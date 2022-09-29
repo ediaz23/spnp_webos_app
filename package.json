@@ -1,5 +1,5 @@
 {
-	"name": "enact",
+	"name": "com.spnp.webos.player",
 	"version": "1.0.0",
 	"description": "A general template for an Enact Sandstone application for webOS TVs",
 	"author": "",
@@ -13,7 +13,12 @@
 		"lint": "enact lint .",
 		"license": "enact license",
 		"test": "enact test",
-		"test-watch": "enact test --watch"
+		"test-watch": "enact test --watch",
+		"build": "gulp build",
+		"build-p": "gulp build-p",
+		"install-tv": "ares-install bin/com.spnp.webos.player_1.0.0_all.ipk",
+		"start": "ares-launch com.spnp.webos.player",
+		"play": "npm run build && npm run install-tv && npm run start"
 	},
 	"license": "UNLICENSED",
 	"private": true,
@@ -44,5 +49,14 @@
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"web-vitals": "^2.1.4"
+	},
+	"devDependencies": {
+		"@types/webostvjs": "^1.2.0",
+		"del": "^7.0.0",
+		"gulp": "^4.0.2",
+		"gulp-jshint": "^2.1.0",
+		"gulp-shell": "^0.8.0",
+		"jshint": "^2.13.5",
+		"webostvjs": "^1.2.5"
 	}
 }
