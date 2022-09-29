@@ -1,0 +1,3 @@
+[submodule "services/spnp_webos_service"]
+	path = services/spnp_webos_service
+	url = https://github.com/ediaz23/spnp_webos_service
