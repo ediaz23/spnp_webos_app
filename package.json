@@ -2,7 +2,6 @@
 	"name": "com.spnp.webos.player",
 	"version": "1.0.0",
 	"description": "A general template for an Enact Sandstone application for webOS TVs",
-	"author": "",
 	"main": "src/index.js",
 	"scripts": {
 		"serve": "enact serve",
@@ -20,7 +19,8 @@
 		"start": "ares-launch com.spnp.webos.player",
 		"play": "npm run build && npm run install-tv && npm run start"
 	},
-	"license": "UNLICENSED",
+	"author": "Esteban Díaz <esteban.diazt23@gmail.com>",
+	"license": "Apache-2.0",
 	"private": true,
 	"repository": "",
 	"engines": {
