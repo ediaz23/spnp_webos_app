@@ -8,19 +8,23 @@ import './attachErrorHandler';
 
 import css from './App.module.less';
 
+
 const App = kind({
-	name: 'App',
+    name: 'App',
 
-	styles: {
-		css,
-		className: 'app'
-	},
+    styles: {
+        css,
+        className: 'app'
+    },
 
-	render: (props) => (
-		<Panels {...props}>
-			<MainPanel />
-		</Panels>
-	)
+    render: (props) => {
+        test().catch(() => {})
+        return (
+            <Panels {...props}>
+                <MainPanel />
+            </Panels>
+        )
+    }
 });
 
 export default ThemeDecorator(App);
