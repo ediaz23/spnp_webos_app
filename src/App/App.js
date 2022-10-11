@@ -1,11 +1,10 @@
-import kind from '@enact/core/kind';
-import ThemeDecorator from '@enact/sandstone/ThemeDecorator';
-import Panels from '@enact/sandstone/Panels';
 
-import MainPanel from '../views/MainPanel';
+import kind from '@enact/core/kind'
+import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
+import PropTypes from 'prop-types'
 
-import './attachErrorHandler';
-
+import MainPanel from '../views/MainPanel'
+import './attachErrorHandler'
 import css from './App.module.less';
 
 
@@ -17,14 +16,20 @@ const App = kind({
         className: 'app'
     },
 
-    render: (props) => {
-        test().catch(() => {})
+    propTypes: {
+        path: PropTypes.string
+    },
+
+    defaultProps: {
+        path: '/home'
+    },
+
+    render: ({ path, ...rest }) => {
         return (
-            <Panels {...props}>
-                <MainPanel />
-            </Panels>
+            <MainPanel title="Media"
+                titleBelow="Select Storage" {...rest} />
         )
     }
 });
 
-export default ThemeDecorator(App);
+export default MoonstoneDecorator(App);

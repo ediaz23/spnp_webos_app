@@ -39,7 +39,7 @@ const makeRequest = async ({ url, method, parameters }) => {
             logger.error(error)
             rej(error)
         }
-        if (!window.plam) {
+        if (window.plam) {
             webOS.service.request(url, {
                 method,
                 parameters,
@@ -58,9 +58,9 @@ const startSsdp = async () => makeRequest({ method: 'startSsdp' })
 const stopSsdp = async () => makeRequest({ method: 'stopSsdp' })
 
 /**
- * @returns {Promise<{devices: Array<Object>}>}
+ * @returns {Promise<{devices: Array<import('../types').Device>}>}
  */
-const searchSsdp = async () => makeRequest({ method: 'searchSsdp' })
+const searchDevices = async () => makeRequest({ method: 'searchSsdp' })
 
 /**
  * @param {Object} obj
@@ -108,7 +108,7 @@ const mediaTest = async () =>
 export default {
     startSsdp,
     stopSsdp,
-    searchSsdp,
+    searchDevices,
     browse,
     searchCapabilities,
     search,
