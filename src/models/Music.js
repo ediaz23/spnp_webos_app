@@ -1,5 +1,6 @@
 
 import Playable from './Playable'
+import defaulImage from '../../assets/img/music.png'
 
 
 export default class Music extends Playable {
@@ -22,5 +23,7 @@ export default class Music extends Playable {
         /** @type {Integer} */
         this.originalTrackNumber = obj.originalTrackNumber
         this.type = 'music'
+        /** @param {String} */
+        this.imageUrl =  obj.albumArtURI || defaulImage
     }
 }

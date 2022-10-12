@@ -26,7 +26,8 @@ const App = ({ ...rest }) => {
                 titleBelow="Select Storage" {...rest}
                 onClick={changePanel}/>
             <FilePanel device={currentDevice} title="Storage Media"
-                titleBelow="Folder" {...rest} />
+                titleBelow="Folder" {...rest}
+                onClick={() => {}} />
         </ActivityPanels>
     )
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import PropTypes from 'prop-types'
 import MessagePanel from './MessagePanel'
+import FileList from '../components/FileList'
 import backend from '../api/backend'
 import File from '../models/File'
 import Folder from '../models/Folder'
@@ -51,9 +52,9 @@ const sortFiles = (a, b) => {
         out = a.title.localeCompare(b.title)
     } else {
         if (a.type === 'folder') {
-            out = 1
-        } else if (b.type === 'folder') {
             out = -1
+        } else if (b.type === 'folder') {
+            out = 1
         } else {
             out = a.title.localeCompare(b.title)
         }
@@ -67,7 +68,7 @@ const sortFiles = (a, b) => {
  * @param {import('../types').Device} obj.device
  * @param {Object} obj.rest
  */
-const FilePanel = ({ title, titleBelow, device, ...rest }) => {
+const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest }) => {
 
     /** @type {[files: Array<File>, setDevices: Function]}  */
     const [files, setFiles] = useState([])
@@ -107,6 +108,10 @@ const FilePanel = ({ title, titleBelow, device, ...rest }) => {
                 <MessagePanel message="No file was found." />}
             {panelIndex === PANELS.ERROR &&
                 <MessagePanel message="Error searching files." />}
+            {panelIndex === PANELS.RESULT &&
+                <FileList id={spotlightId} files={files}
+                        index={rest['data-index']} onClick={onClick}/>
+            }
         </Panel>
     )
 }
@@ -114,6 +119,8 @@ const FilePanel = ({ title, titleBelow, device, ...rest }) => {
 FilePanel.propTypes = {
     title: PropTypes.string,
     titleBelow: PropTypes.string,
+    spotlightId: PropTypes.string,
+    onClick: PropTypes.func,
     device: PropTypes.object
 }
 

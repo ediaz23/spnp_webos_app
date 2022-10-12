@@ -16,6 +16,7 @@
  * @property {String} name
  * @property {RemoteInfo} rinfo
  * @property {Object} schema
+ * @property {String} image
  */
 
 export default {}

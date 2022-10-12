@@ -1,4 +1,7 @@
 
+import defaulImage from '../../assets/img/file.png'
+
+
 export default class File {
     constructor(obj) {
         /** @type {String} */
@@ -11,5 +14,7 @@ export default class File {
         this.title = obj.title
         /** @type {String} */
         this.type = 'file'
+        /** @type {String} */
+        this.imageUrl = defaulImage
     }
 }

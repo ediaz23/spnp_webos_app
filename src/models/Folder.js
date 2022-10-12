@@ -1,5 +1,6 @@
 
 import File from './File'
+import defaulImage from '../../assets/img/folder.png'
 
 
 export default class Folder extends File {
@@ -12,5 +13,7 @@ export default class Folder extends File {
         /** @type {Integer} */
         this.storageUsed = obj.storageUsed
         this.type = 'folder'
+        /** @type {String} */
+        this.imageUrl = defaulImage
     }
 }
