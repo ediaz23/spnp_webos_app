@@ -16,15 +16,20 @@ import wifiImage from '../../assets/img/wifi.jpg'
  */
 const DeviceList = ({ id, devices, onClick, ...rest }) => {
 
+    const selectItem = useCallback(event => {
+        onClick(devices[parseInt(event.currentTarget.dataset.index)])
+    }, [devices, onClick])
+
     const renderItem = useCallback(({ index, ...restProps }) => (
         <GridListImageItem
             {...restProps}
             caption={devices[index].name}
-            onClick={onClick}
+            onClick={selectItem}
             subCaption={'wifi'}
             source={wifiImage}
+            index={index}
         />
-    ), [onClick])
+    ), [devices, selectItem])
 
     return (
         <VirtualGridList

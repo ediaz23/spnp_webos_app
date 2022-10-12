@@ -1,35 +1,34 @@
 
-import kind from '@enact/core/kind'
+import { useCallback, useState } from 'react'
 import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
-import PropTypes from 'prop-types'
+import { ActivityPanels } from '@enact/moonstone/Panels'
 
-import MainPanel from '../views/MainPanel'
+import DevicePanel from '../views/DevicePanel'
+import FilePanel from '../views/FilePanel'
 import './attachErrorHandler'
 import css from './App.module.less';
 
 
-const App = kind({
-    name: 'App',
+const App = ({ ...rest }) => {
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const [currentDevice, setCurrentDevice] = useState(null)
+    const handleSelectBreadcrumb = useCallback(({ index }) => {
+        setCurrentIndex(index)
+    }, [])
+    const changePanel = useCallback(device => {
+        setCurrentDevice(device)
+        setCurrentIndex(1)
+    }, [])
+    rest.className += ' ' + css.app
+    return (
+        <ActivityPanels index={currentIndex} onSelectBreadcrumb={handleSelectBreadcrumb} {...rest}>
+            <DevicePanel title="Storage Media"
+                titleBelow="Select Storage" {...rest}
+                onClick={changePanel}/>
+            <FilePanel device={currentDevice} title="Storage Media"
+                titleBelow="Folder" {...rest} />
+        </ActivityPanels>
+    )
+}
 
-    styles: {
-        css,
-        className: 'app'
-    },
-
-    propTypes: {
-        path: PropTypes.string
-    },
-
-    defaultProps: {
-        path: '/home'
-    },
-
-    render: ({ path, ...rest }) => {
-        return (
-            <MainPanel title="Media"
-                titleBelow="Select Storage" {...rest} />
-        )
-    }
-});
-
-export default MoonstoneDecorator(App);
+export default MoonstoneDecorator(App)
