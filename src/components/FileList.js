@@ -4,17 +4,26 @@ import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import GridListImageItem from '@enact/moonstone/GridListImageItem'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
-import File from '../models/File'
 
 
 /**
  * @param {Object} obj
  * @param {String} obj.id
- * @param {Array<File>} obj.files
+ * @param {Array<import('../models/File').default>} obj.files
  * @param {Function} obj.onClick
  * @param {Object} obj.rest
  */
 const FileList = ({ id, files, onClick, ...rest }) => {
+
+    const selectItem = useCallback(event => {
+        /** @type {import('../models/File').default} */
+        const file = files[parseInt(event.currentTarget.dataset.index)]
+        if (file.type !== 'folder') {
+            onClick({ file  })
+        } else {
+            /** @todo navegaro en carpetas */
+        }
+    }, [files, onClick])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <GridListImageItem
@@ -22,8 +31,9 @@ const FileList = ({ id, files, onClick, ...rest }) => {
             caption={files[index].title}
             source={files[index].imageUrl}
             index={index}
+            onClick={selectItem}
         />
-    ), [files])
+    ), [files, selectItem])
 
     return (
         <VirtualGridList

@@ -87,7 +87,7 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
         } else {
             setPanelIndex(PANELS.EMPTY)
         }
-    }, [])
+    }, [device])
 
     useEffect(() => {
         fetchData().catch(error => {

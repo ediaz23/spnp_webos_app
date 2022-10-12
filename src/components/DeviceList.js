@@ -18,7 +18,8 @@ import imageCss from './DeviceList.module.less'
 const DeviceList = ({ id, devices, onClick, ...rest }) => {
 
     const selectItem = useCallback(event => {
-        onClick(devices[parseInt(event.currentTarget.dataset.index)])
+        const device = devices[parseInt(event.currentTarget.dataset.index)]
+        onClick({ device })
     }, [devices, onClick])
 
     const renderItem = useCallback(({ index, ...restProps }) => (

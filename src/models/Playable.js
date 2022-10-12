@@ -16,5 +16,8 @@ export default class Playable extends File {
             size: parseInt(obj.res.size),
             url: obj.res.url,
         }
+        const chunks = this.res.protocolInfo.split(':')
+        /** @type {String} */
+        this.mimeType = chunks[2]
     }
 }
