@@ -6,19 +6,19 @@ import Player from '../components/Player'
 
 const PlayerPanelBase = ({...rest}) => {
     delete rest.hideChildren
-    delete rest.changePanel
+    delete rest.backHome
     return (
         <Player {...rest} />
     )
 }
 
 Player.propTypes = {
-    changePanel: PropTypes.func,
+    backHome: PropTypes.func,
 }
 
 const handleCancel = (ev, props) => {
     ev.stopPropagation()
-    props.changePanel({})
+    props.backHome()
 }
 
 const PlayerPanel = Cancelable(

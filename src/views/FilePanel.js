@@ -3,6 +3,8 @@ import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
 import { useEffect, useState, useCallback } from 'react'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import PropTypes from 'prop-types'
+import { useRecoilValue } from 'recoil'
+import { deviceState, filePathState } from '../recoilConfig'
 import MessagePanel from './MessagePanel'
 import FileList from '../components/FileList'
 import PathNavigate from '../components/PathNavigate'
@@ -66,17 +68,18 @@ const sortFiles = (a, b) => {
 
 /**
  * @param {Object} obj
- * @param {import('../types').Device} obj.device
+ * @param  obj.device
  * @param {Object} obj.rest
  */
-const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest }) => {
-
+const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
+    /** @type {import('../types').Device} */
+    const device = useRecoilValue(deviceState)
     /** @type {[files: Array<File>, setDevices: Function]}  */
     const [files, setFiles] = useState([])
-    /** @type {[currentFolder: Folder, setCurrentFolder: Function]} */
-    const [currentFolder, setCurrentFolder] = useState(null)
-    /** @type {[path: Array<Folder>, setPath: function]} */
-    let [path, setPath] = useState([])
+    /** @type {Array<Folder>} */
+    const filePath = useRecoilValue(filePathState)
+    /** @type {Folder} */
+    const currentFolder = filePath.length ? filePath[filePath.length - 1] : null
     const [panelIndex, setPanelIndex] = useState(0)
 
     const fetchData = useCallback(async () => {
@@ -97,24 +100,6 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
         }
     }, [device, currentFolder])
 
-    const pushFolder = useCallback(folder => {
-        path.push(folder)
-        setCurrentFolder(folder)
-    }, [path])
-
-    const popFolder = useCallback(event => {
-        const { folderId } = event.currentTarget.dataset
-        const index = path.findIndex(folder => folder.id === folderId)
-        if (index === -1) {
-            setCurrentFolder(null)
-        } else {
-            setCurrentFolder(path[index])
-        }
-        if (index < path.length - 1) {
-            setPath(path.splice(0, index))
-        }
-    }, [path])
-
     useEffect(() => {
         fetchData().catch(error => {
             console.error('Error fetching devices')
@@ -126,7 +111,7 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} />
-            <PathNavigate path={path} popFolder={popFolder} />
+            <PathNavigate />
             {panelIndex === PANELS.INIT &&
                 <MessagePanel message="Hellow" />}
             {panelIndex === PANELS.SEARCHING &&
@@ -137,19 +122,16 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
                 <MessagePanel message="Error searching files." />}
             {panelIndex === PANELS.RESULT &&
                 <FileList id={spotlightId} files={files}
-                    index={rest['data-index']} onClick={onClick}
-                    pushFolder={pushFolder} />
+                    index={rest['data-index']} />
             }
         </Panel>
     )
 }
 
 FilePanel.propTypes = {
+    spotlightId: PropTypes.string,
     title: PropTypes.string,
     titleBelow: PropTypes.string,
-    spotlightId: PropTypes.string,
-    onClick: PropTypes.func,
-    device: PropTypes.object
 }
 
 export default MoonstoneDecorator(FilePanel)

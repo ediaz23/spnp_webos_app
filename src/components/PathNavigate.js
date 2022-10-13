@@ -1,26 +1,35 @@
 
+import { useCallback } from 'react'
+import { useRecoilState } from 'recoil'
 import Item from '@enact/moonstone/Item'
-import PropTypes from 'prop-types'
 import css from './PathNavigate.module.less'
+import { filePathState } from '../recoilConfig'
 
 
 /**
- * @param {Object} obj
- * @param {Array<import('../models/Folder').default>} obj.path
- * @param {Function} obj.popFolder
- * @param {Object} obj.rest
+ * @param {Object} rest
  */
-const PathNavigate = ({ path, popFolder, ...rest }) => {
-
+const PathNavigate = ({ ...rest }) => {
+    /** @type {[filePath: Array<import('../models/Folder').default>, setFilePath: function]} */
+    const [filePath, setFilePath] = useRecoilState(filePathState)
     const items = []
     let key = 1
+    const popFolder = useCallback(event => {
+        const { folderId } = event.currentTarget.dataset
+        const index = filePath.findIndex(folder => folder.id === folderId)
+        if (index === -1) {
+            setFilePath([])
+        } else if (index + 1 < filePath.length) {
+            setFilePath(filePath.slice(0, index + 1))
+        }
+    }, [filePath, setFilePath])
     items.push((
         <Item {...rest} key={key - 1} onClick={popFolder}
             data-folder-id={'-1'}>
             Media Folder
         </Item>
     ))
-    for (const folder of path) {
+    for (const folder of filePath) {
         items.push((<div key={key}>/</div>))
         items.push((
             <Item {...rest} key={key + 1} onClick={popFolder}
@@ -35,11 +44,6 @@ const PathNavigate = ({ path, popFolder, ...rest }) => {
             {items}
         </div>
     )
-}
-
-PathNavigate.propTypes = {
-    path: PropTypes.array,
-    popFolder: PropTypes.func,
 }
 
 export default PathNavigate

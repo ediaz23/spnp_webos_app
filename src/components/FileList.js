@@ -4,26 +4,32 @@ import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import GridListImageItem from '@enact/moonstone/GridListImageItem'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
+import { useSetRecoilState } from 'recoil'
+import { pathState, fileState, filePathState } from '../recoilConfig'
 
 
 /**
  * @param {Object} obj
  * @param {String} obj.id
  * @param {Array<import('../models/File').default>} obj.files
- * @param {Function} obj.onClick
  * @param {Object} obj.rest
  */
-const FileList = ({ id, files, onClick, pushFolder, ...rest }) => {
+const FileList = ({ id, files, ...rest }) => {
+
+    const setPath = useSetRecoilState(pathState)
+    const setFile = useSetRecoilState(fileState)
+    const setFilePath = useSetRecoilState(filePathState)
 
     const selectItem = useCallback(event => {
         /** @type {import('../models/File').default} */
         const file = files[parseInt(event.currentTarget.dataset.index)]
         if (file.type !== 'folder') {
-            onClick({ file  })
+            setFile(file)
+            setPath('/player')
         } else {
-            pushFolder(file)
+            setFilePath(oldList => [...oldList, file])
         }
-    }, [files, onClick, pushFolder])
+    }, [files, setFile, setPath, setFilePath])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <GridListImageItem
@@ -55,8 +61,6 @@ const FileList = ({ id, files, onClick, pushFolder, ...rest }) => {
 FileList.propTypes = {
     id: PropTypes.string,
     files: PropTypes.array,
-    onClick: PropTypes.func,
-    pushFolder: PropTypes.func,
 }
 
 export default FileList

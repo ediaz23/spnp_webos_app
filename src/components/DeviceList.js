@@ -4,23 +4,30 @@ import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import GridListImageItem from '@enact/moonstone/GridListImageItem'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
+import { useSetRecoilState } from 'recoil'
 import wifiImage from '../../assets/img/wifi.png'
 import imageCss from './DeviceList.module.less'
+import { deviceState, homeIndexState, filePathState } from '../recoilConfig'
 
 
 /**
  * @param {Object} obj
  * @param {String} obj.id
  * @param {Array<import('../types').Device>} obj.devices
- * @param {Function} obj.onClick
  * @param {Object} obj.rest
  */
-const DeviceList = ({ id, devices, onClick, ...rest }) => {
+const DeviceList = ({ id, devices, ...rest }) => {
+
+    const setDevice = useSetRecoilState(deviceState)
+    const setHomeIndex = useSetRecoilState(homeIndexState)
+    const setFilePath = useSetRecoilState(filePathState)
 
     const selectItem = useCallback(event => {
         const device = devices[parseInt(event.currentTarget.dataset.index)]
-        onClick({ device })
-    }, [devices, onClick])
+        setDevice(device)
+        setFilePath([])
+        setHomeIndex(1)
+    }, [devices, setDevice, setHomeIndex, setFilePath])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <GridListImageItem
@@ -53,7 +60,6 @@ const DeviceList = ({ id, devices, onClick, ...rest }) => {
 DeviceList.propTypes = {
     id: PropTypes.string,
     devices: PropTypes.array,
-    onClick: PropTypes.func,
 }
 
 export default DeviceList

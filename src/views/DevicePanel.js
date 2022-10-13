@@ -20,7 +20,7 @@ const PANELS = {
     RESULT: 4,
 }
 
-const DevicePanel = ({ title, titleBelow, spotlightId, onClick, ...rest }) => {
+const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     /** @type {[devices: Array, setDevices: Function]}  */
     const [devices, setDevices] = useState([])
     const [panelIndex, setPanelIndex] = useState(0)
@@ -58,17 +58,16 @@ const DevicePanel = ({ title, titleBelow, spotlightId, onClick, ...rest }) => {
                 <MessagePanel message="Error searching devices." />}
             {panelIndex === PANELS.RESULT &&
                 <DeviceList id={spotlightId} devices={devices}
-                    index={rest['data-index']} onClick={onClick} />
+                    index={rest['data-index']} />
             }
         </Panel>
     )
 }
 
 DevicePanel.propTypes = {
+    spotlightId: PropTypes.string,
     title: PropTypes.string,
     titleBelow: PropTypes.string,
-    spotlightId: PropTypes.string,
-    onClick: PropTypes.func
 }
 
 export default DevicePanel
