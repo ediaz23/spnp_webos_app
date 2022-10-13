@@ -13,7 +13,7 @@ import PropTypes from 'prop-types'
  * @param {Function} obj.onClick
  * @param {Object} obj.rest
  */
-const FileList = ({ id, files, onClick, ...rest }) => {
+const FileList = ({ id, files, onClick, pushFolder, ...rest }) => {
 
     const selectItem = useCallback(event => {
         /** @type {import('../models/File').default} */
@@ -21,9 +21,9 @@ const FileList = ({ id, files, onClick, ...rest }) => {
         if (file.type !== 'folder') {
             onClick({ file  })
         } else {
-            /** @todo navegaro en carpetas */
+            pushFolder(file)
         }
-    }, [files, onClick])
+    }, [files, onClick, pushFolder])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <GridListImageItem
@@ -56,6 +56,7 @@ FileList.propTypes = {
     id: PropTypes.string,
     files: PropTypes.array,
     onClick: PropTypes.func,
+    pushFolder: PropTypes.func,
 }
 
 export default FileList

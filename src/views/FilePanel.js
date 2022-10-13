@@ -5,6 +5,7 @@ import { Header, Panel } from '@enact/moonstone/Panels'
 import PropTypes from 'prop-types'
 import MessagePanel from './MessagePanel'
 import FileList from '../components/FileList'
+import PathNavigate from '../components/PathNavigate'
 import backend from '../api/backend'
 import File from '../models/File'
 import Folder from '../models/Folder'
@@ -72,12 +73,19 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
 
     /** @type {[files: Array<File>, setDevices: Function]}  */
     const [files, setFiles] = useState([])
+    /** @type {[currentFolder: Folder, setCurrentFolder: Function]} */
+    const [currentFolder, setCurrentFolder] = useState(null)
+    /** @type {[path: Array<Folder>, setPath: function]} */
+    let [path, setPath] = useState([])
     const [panelIndex, setPanelIndex] = useState(0)
 
     const fetchData = useCallback(async () => {
         setPanelIndex(PANELS.SEARCHING)
-
-        const { files: data } = await backend.browse({ deviceId: device.id })
+        const filter = { deviceId: device.id }
+        if (currentFolder) {
+            filter.id = currentFolder.id
+        }
+        const { files: data } = await backend.browse(filter)
 
         if (data && data.length) {
             /** @type {Array<File>} */
@@ -87,7 +95,25 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
         } else {
             setPanelIndex(PANELS.EMPTY)
         }
-    }, [device])
+    }, [device, currentFolder])
+
+    const pushFolder = useCallback(folder => {
+        path.push(folder)
+        setCurrentFolder(folder)
+    }, [path])
+
+    const popFolder = useCallback(event => {
+        const { folderId } = event.currentTarget.dataset
+        const index = path.findIndex(folder => folder.id === folderId)
+        if (index === -1) {
+            setCurrentFolder(null)
+        } else {
+            setCurrentFolder(path[index])
+        }
+        if (index < path.length - 1) {
+            setPath(path.splice(0, index))
+        }
+    }, [path])
 
     useEffect(() => {
         fetchData().catch(error => {
@@ -100,6 +126,7 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} />
+            <PathNavigate path={path} popFolder={popFolder} />
             {panelIndex === PANELS.INIT &&
                 <MessagePanel message="Hellow" />}
             {panelIndex === PANELS.SEARCHING &&
@@ -110,7 +137,8 @@ const FilePanel = ({ title, titleBelow, spotlightId, onClick, device, ...rest })
                 <MessagePanel message="Error searching files." />}
             {panelIndex === PANELS.RESULT &&
                 <FileList id={spotlightId} files={files}
-                        index={rest['data-index']} onClick={onClick}/>
+                    index={rest['data-index']} onClick={onClick}
+                    pushFolder={pushFolder} />
             }
         </Panel>
     )
