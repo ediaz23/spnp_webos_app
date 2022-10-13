@@ -1,20 +1,20 @@
 
 import { useCallback, useState } from 'react'
 import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
-import { ActivityPanels } from '@enact/moonstone/Panels'
-
-import DevicePanel from '../views/DevicePanel'
-import FilePanel from '../views/FilePanel'
-import Player from '../components/Player'
+import { Panels, Routable, Route } from '@enact/moonstone/Panels'
+import HomePanel from '../views/HomePanel'
+import PlayerPanel from '../views/PlayerPanel'
 import './attachErrorHandler'
-import css from './App.module.less';
 
+
+const RoutablePanels = Routable({ navigate: 'onBack' }, Panels)
 
 const App = ({ ...rest }) => {
+    const [path, setPath] = useState('/home')
     const [currentIndex, setCurrentIndex] = useState(0)
     const [currentDevice, setCurrentDevice] = useState(null)
     const [currentFile, setCurrentFile] = useState(null)
-    const handleSelectBreadcrumb = useCallback(({ index }) => {
+    const handleBreadcrumb = useCallback(({ index }) => {
         setCurrentIndex(index)
     }, [])
     const changePanel = useCallback(({ device, file }) => {
@@ -23,20 +23,18 @@ const App = ({ ...rest }) => {
             setCurrentIndex(1)
         } else if (file) {
             setCurrentFile(file)
-            setCurrentIndex(2)
+            setPath('/player')
+        } else {
+            setPath('/home')
         }
     }, [])
-    rest.className += ' ' + css.app
+    const props = { currentIndex, currentDevice, changePanel, handleBreadcrumb }
     return (
-        <ActivityPanels index={currentIndex} onSelectBreadcrumb={handleSelectBreadcrumb} {...rest}>
-            <DevicePanel title="Storage Media"
-                titleBelow="Select Storage" {...rest}
-                onClick={changePanel}/>
-            <FilePanel device={currentDevice} title="Storage Media"
-                titleBelow="Folder" {...rest}
-                onClick={changePanel} />
-            <Player file={currentFile} {...rest} />
-        </ActivityPanels>
+        <RoutablePanels {...rest} path={path}>
+            <Route path='home' component={HomePanel} {...props} {...rest} />
+            <Route path='player' component={PlayerPanel} file={currentFile}
+                changePanel={changePanel} {...rest} />
+        </RoutablePanels>
     )
 }
 

@@ -12,8 +12,6 @@ import css from './Player.module.less';
  * @param {Object} obj.rest
  */
 const Player = ({ className, file, ...rest }) => {
-    console.log(`${file.res.url} ${file.mimeType} ${file.title}`)
-    delete rest.hideChildren
     return (
         <VideoPlayer {...rest} className={className + css.player + ' enact-fit'} >
             <source src={file.res.url} type={file.mimeType} />
