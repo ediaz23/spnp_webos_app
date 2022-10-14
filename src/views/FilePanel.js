@@ -2,6 +2,7 @@
 import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
 import { useEffect, useState, useCallback } from 'react'
 import { Header, Panel } from '@enact/moonstone/Panels'
+import { Cell, Column, Row } from '@enact/ui/Layout'
 import PropTypes from 'prop-types'
 import { useRecoilValue } from 'recoil'
 import { deviceState, filePathState } from '../recoilConfig'
@@ -107,23 +108,32 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
             setPanelIndex(PANELS.ERROR)
         })
     }, [fetchData])
-
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} />
-            <PathNavigate />
-            {panelIndex === PANELS.INIT &&
-                <MessagePanel message="Hellow" />}
-            {panelIndex === PANELS.SEARCHING &&
-                <MessagePanel message="Searching files." />}
-            {panelIndex === PANELS.EMPTY &&
-                <MessagePanel message="No file was found." />}
-            {panelIndex === PANELS.ERROR &&
-                <MessagePanel message="Error searching files." />}
-            {panelIndex === PANELS.RESULT &&
-                <FileList id={spotlightId} files={files}
-                    index={rest['data-index']} />
-            }
+            <Row style={{ height: '100%' }}>
+                <Cell>
+                    <Column>
+                        <Cell shrink>
+                            <PathNavigate />
+                        </Cell>
+                        <Cell>
+                            {panelIndex === PANELS.INIT &&
+                                <MessagePanel message="Hellow" />}
+                            {panelIndex === PANELS.SEARCHING &&
+                                <MessagePanel message="Searching files." />}
+                            {panelIndex === PANELS.EMPTY &&
+                                <MessagePanel message="No file was found." />}
+                            {panelIndex === PANELS.ERROR &&
+                                <MessagePanel message="Error searching files." />}
+                            {panelIndex === PANELS.RESULT &&
+                                <FileList id={spotlightId} files={files}
+                                    index={rest['data-index']} />
+                            }
+                        </Cell>
+                    </Column>
+                </Cell>
+            </Row>
         </Panel>
     )
 }
