@@ -1,6 +1,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Header, Panel } from '@enact/moonstone/Panels'
+import $L from '@enact/i18n/$L'
 import PropTypes from 'prop-types'
 import MessagePanel from './MessagePanel'
 import backend from '../api/backend'
@@ -51,13 +52,13 @@ const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} />
             {panelIndex === PANELS.INIT &&
-                <MessagePanel message="Hellow" />}
+                <MessagePanel message={$L('Hellow')} />}
             {panelIndex === PANELS.SEARCHING &&
-                <MessagePanel message="Searching devices." />}
+                <MessagePanel message={$L('Searching devices.')} />}
             {panelIndex === PANELS.EMPTY &&
-                <MessagePanel message="No device was found." />}
+                <MessagePanel message={$L('No device was found.')} />}
             {panelIndex === PANELS.ERROR &&
-                <MessagePanel message="Error searching devices." />}
+                <MessagePanel message={$L('Error searching devices.')} />}
             {panelIndex === PANELS.RESULT &&
                 <DeviceList id={spotlightId} devices={devices}
                     index={rest['data-index']} />

@@ -5,6 +5,7 @@ import { Header, Panel } from '@enact/moonstone/Panels'
 import { Cell, Column, Row } from '@enact/ui/Layout'
 import IconButton from '@enact/moonstone/IconButton'
 import Input from '@enact/moonstone/Input'
+import $L from '@enact/i18n/$L'
 import PropTypes from 'prop-types'
 import { useRecoilValue, useRecoilState } from 'recoil'
 import { deviceState, filePathState, searchState } from '../recoilConfig'
@@ -90,7 +91,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const fetchData = useCallback(async () => {
         setPanelIndex(PANELS.SEARCHING)
         let data
-        const filter = { deviceId: device.id}
+        const filter = { deviceId: device.id }
         if (currentFolder) {
             filter.id = currentFolder.id
         }
@@ -131,7 +132,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} >
-                <Input placeholder="Search" value={value} onChange={handleChange} />
+                <Input placeholder={$L('Search')} value={value} onChange={handleChange} />
                 <IconButton size="small" onClick={searchButton}>search</IconButton>
             </Header>
             <Row style={{ height: '100%' }}>
@@ -142,13 +143,13 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
                         </Cell>
                         <Cell>
                             {panelIndex === PANELS.INIT &&
-                                <MessagePanel message="Hellow" />}
+                                <MessagePanel message={$L('Hellow')} />}
                             {panelIndex === PANELS.SEARCHING &&
-                                <MessagePanel message="Searching files." />}
+                                <MessagePanel message={$L('Searching files.')} />}
                             {panelIndex === PANELS.EMPTY &&
-                                <MessagePanel message="No file was found." />}
+                                <MessagePanel message={$L('No file was found.')} />}
                             {panelIndex === PANELS.ERROR &&
-                                <MessagePanel message="Error searching files." />}
+                                <MessagePanel message={$L('Error searching files.')} />}
                             {panelIndex === PANELS.RESULT &&
                                 <FileList id={spotlightId} files={files}
                                     index={rest['data-index']} />

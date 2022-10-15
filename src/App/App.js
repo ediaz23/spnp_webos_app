@@ -1,5 +1,6 @@
 
 import { useCallback } from 'react'
+import { I18nContextDecorator } from '@enact/i18n/I18nDecorator'
 import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
 import { Panels, Routable, Route } from '@enact/moonstone/Panels'
 import { useRecoilState } from 'recoil'
@@ -25,4 +26,4 @@ const App = ({ ...rest }) => {
     )
 }
 
-export default MoonstoneDecorator(App)
+export default MoonstoneDecorator(I18nContextDecorator(App))
