@@ -7,14 +7,15 @@ export default class Playable extends File {
         super(obj)
         /** @type {Date} */
         this.date = new Date(obj.date)
+        const res = Array.isArray(obj.res) ? obj.res[0] : obj.res
         this.res = {
-            bitrate: parseInt(obj.res.bitrate),
-            duration: obj.res.duration,
-            nrAudioChannels: parseInt(obj.res.nrAudioChannels),
-            protocolInfo: obj.res.protocolInfo,
-            sampleFrequency: parseInt(obj.res.sampleFrequency),
-            size: parseInt(obj.res.size),
-            url: obj.res.url,
+            bitrate: parseInt(res.bitrate),
+            duration: res.duration,
+            nrAudioChannels: parseInt(res.nrAudioChannels),
+            protocolInfo: res.protocolInfo,
+            sampleFrequency: parseInt(res.sampleFrequency),
+            size: parseInt(res.size),
+            url: res.url,
         }
         const chunks = this.res.protocolInfo.split(':')
         /** @type {String} */

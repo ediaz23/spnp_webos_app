@@ -3,9 +3,11 @@ import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
 import { useEffect, useState, useCallback } from 'react'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import { Cell, Column, Row } from '@enact/ui/Layout'
+import IconButton from '@enact/moonstone/IconButton'
+import Input from '@enact/moonstone/Input'
 import PropTypes from 'prop-types'
-import { useRecoilValue } from 'recoil'
-import { deviceState, filePathState } from '../recoilConfig'
+import { useRecoilValue, useRecoilState } from 'recoil'
+import { deviceState, filePathState, searchState } from '../recoilConfig'
 import MessagePanel from './MessagePanel'
 import FileList from '../components/FileList'
 import PathNavigate from '../components/PathNavigate'
@@ -51,7 +53,7 @@ const toFile = file => {
  * @returns {Integer}
  */
 const sortFiles = (a, b) => {
-    let out
+    let out = -1
     if (a.type === b.type) {
         out = a.title.localeCompare(b.title)
     } else {
@@ -82,15 +84,24 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     /** @type {Folder} */
     const currentFolder = filePath.length ? filePath[filePath.length - 1] : null
     const [panelIndex, setPanelIndex] = useState(0)
+    const [search, setSearch] = useRecoilState(searchState)
+    const [value, setValue] = useState(search)
 
     const fetchData = useCallback(async () => {
         setPanelIndex(PANELS.SEARCHING)
-        const filter = { deviceId: device.id }
+        let data
+        const filter = { deviceId: device.id}
         if (currentFolder) {
             filter.id = currentFolder.id
         }
-        const { files: data } = await backend.browse(filter)
-
+        if (search) {
+            filter.query = search
+            const res = await backend.search(filter)
+            data = res.files
+        } else {
+            const res = await backend.browse(filter)
+            data = res.files
+        }
         if (data && data.length) {
             /** @type {Array<File>} */
             const newData = data.map(toFile)
@@ -99,7 +110,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         } else {
             setPanelIndex(PANELS.EMPTY)
         }
-    }, [device, currentFolder])
+    }, [device, currentFolder, search])
 
     useEffect(() => {
         fetchData().catch(error => {
@@ -108,9 +119,21 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
             setPanelIndex(PANELS.ERROR)
         })
     }, [fetchData])
+
+    const handleChange = useCallback((ev) => {
+        setValue(ev.value);
+    }, [])
+
+    const searchButton = useCallback(() => {
+        setSearch(value)
+    }, [value, setSearch])
+
     return (
         <Panel {...rest}>
-            <Header title={title} titleBelow={titleBelow} />
+            <Header title={title} titleBelow={titleBelow} >
+                <Input placeholder="Search" value={value} onChange={handleChange} />
+                <IconButton size="small" onClick={searchButton}>search</IconButton>
+            </Header>
             <Row style={{ height: '100%' }}>
                 <Cell>
                     <Column>

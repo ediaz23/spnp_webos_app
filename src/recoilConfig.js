@@ -25,3 +25,8 @@ export const filePathState = atom({
     key: 'filePathState',
     default: []
 })
+
+export const searchState = atom({
+    key: 'searchState',
+    default: ''
+})

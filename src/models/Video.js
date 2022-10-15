@@ -11,5 +11,8 @@ export default class Video extends Playable {
         this.type = 'video'
         /** @type {String} */
         this.imageUrl = defaulImage
+        if (Array.isArray(obj.res)) {
+            this.imageUrl = obj.res[1].url
+        }
     }
 }

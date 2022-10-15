@@ -7,7 +7,7 @@ import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
 import wifiImage from '../../assets/img/wifi.png'
 import imageCss from './DeviceList.module.less'
-import { deviceState, homeIndexState, filePathState } from '../recoilConfig'
+import { deviceState, homeIndexState, filePathState, searchState } from '../recoilConfig'
 
 
 /**
@@ -21,13 +21,15 @@ const DeviceList = ({ id, devices, ...rest }) => {
     const setDevice = useSetRecoilState(deviceState)
     const setHomeIndex = useSetRecoilState(homeIndexState)
     const setFilePath = useSetRecoilState(filePathState)
+    const setSearch = useSetRecoilState(searchState)
 
     const selectItem = useCallback(event => {
         const device = devices[parseInt(event.currentTarget.dataset.index)]
         setDevice(device)
         setFilePath([])
+        setSearch('')
         setHomeIndex(1)
-    }, [devices, setDevice, setHomeIndex, setFilePath])
+    }, [devices, setDevice, setHomeIndex, setFilePath, setSearch])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <GridListImageItem

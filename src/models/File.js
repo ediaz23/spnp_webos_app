@@ -11,7 +11,7 @@ export default class File {
         /** @type {Boolean} */
         this.restricted = obj.restricted === '1'
         /** @type {String} */
-        this.title = obj.title
+        this.title = '' + obj.title
         /** @type {String} */
         this.type = 'file'
         /** @type {String} */
