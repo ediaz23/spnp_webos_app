@@ -34,7 +34,7 @@ const FileList = ({ id, files, ...rest }) => {
         }
     }, [files, setFile, setPath, setFilePath])
 
-    const renderItem = useCallback(({ index, ...restProps }) => {
+    const renderItem = useCallback(({ index }) => {
 
         const cleanDuration = str => str.split('.')[0]
         /** @param {import('../models/File').default} file */
@@ -46,24 +46,33 @@ const FileList = ({ id, files, ...rest }) => {
                 <BodyText>{cleanDuration(file.res.duration)}</BodyText>
             </div>
         )
-        return (
-            <Item {...restProps}
+
+        const item = itemIndex => (
+            <Item key={itemIndex}
+                data-index={itemIndex}
                 className={css.item}
-                index={index}
+                index={itemIndex}
                 onClick={selectItem}>
                 <Image className={css.image}
-                    src={files[index].imageUrl}
+                    src={files[itemIndex].imageUrl}
                     style={{ maxHeight: 100, maxWidth: 100 }} />
-                {['folder', 'image'].includes(files[index].type) && simple(files[index])}
-                {['video', 'music'].includes(files[index].type) && playable(files[index])}
+                {['folder', 'image'].includes(files[itemIndex].type) && simple(files[itemIndex])}
+                {['video', 'music'].includes(files[itemIndex].type) && playable(files[itemIndex])}
             </Item>
         )
+
+        return (
+            <div key={'row' + index}>
+                {item(index << 1)}
+                {(index << 1) + 1 < files.length && item((index << 1) + 1)}
+            </div>
+        )
     }, [files, selectItem])
+    const size = (files.length >> 1) + (files.length & 1)
     return (
         <VirtualList
-            className={css.fileList}
             {...rest}
-            dataSize={files.length}
+            dataSize={size}
             focusableScrollbar
             id={id}
             itemRenderer={renderItem}
