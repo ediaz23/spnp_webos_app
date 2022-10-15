@@ -5,7 +5,6 @@ import GridListImageItem from '@enact/moonstone/GridListImageItem'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
-import wifiImage from '../../assets/img/wifi.png'
 import imageCss from './DeviceList.module.less'
 import { deviceState, homeIndexState, filePathState, searchState } from '../recoilConfig'
 
@@ -36,8 +35,8 @@ const DeviceList = ({ id, devices, ...rest }) => {
             {...restProps}
             caption={devices[index].name}
             onClick={selectItem}
-            subCaption={devices[index].image}
-            source={wifiImage}
+            subCaption={devices[index].source}
+            source={devices[index].image}
             index={index}
             css={{ image: imageCss.imageFix }}
         />

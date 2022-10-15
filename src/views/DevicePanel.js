@@ -31,7 +31,9 @@ const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         await backend.startSsdp()
         const { devices: data } = await backend.searchDevices()
         if (data && data.length) {
-            setDevices(data.map((dev, index) => { return { ...dev, image: wifiImg[index % wifiImg.length] } }))
+            setDevices(data.map((dev, index) => {
+                return { ...dev, image: wifiImg[index % wifiImg.length], source: 'wifi' }
+            }))
             setPanelIndex(PANELS.RESULT)
         } else {
             setPanelIndex(PANELS.EMPTY)

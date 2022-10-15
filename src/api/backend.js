@@ -27,7 +27,12 @@ const devRequest = ({ method, parameters, resolver, rejecter }) => {
 
 const makeRequest = async ({ url, method, parameters }) => {
     url = url || serviceURL
-    logger.info(`req ${url} - ${method}`)
+    const isTv = window.PalmServiceBridge || window.PalmServiceBridge
+    if (isTv) {
+        logger.info(`req plam ${url} - ${method}`)
+    } else {
+        logger.info(`req ${url} - ${method}`)
+    }
     return new Promise((res, rej) => {
         const resolver = (data) => {
             logger.info('res okey')
@@ -39,7 +44,7 @@ const makeRequest = async ({ url, method, parameters }) => {
             logger.error(error)
             rej(error)
         }
-        if (window.plam) {
+        if (isTv) {
             webOS.service.request(url, {
                 method,
                 parameters,
