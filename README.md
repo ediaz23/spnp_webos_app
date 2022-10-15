@@ -69,6 +69,10 @@ Runs the Enact configuration of Eslint on the project for syntax analysis.
 
 These tasks will execute all valid tests (files that end in `-specs.js`) that are within the project directory. The `test` is a standard single execution pass, while `test-watch` will set up a watcher to re-execute tests when files change.
 
+### `npm run build` to create lg webos app (`npm run build-p` for prod version)
+
+These tasks will execute all task to generate a lg webos app in bin folder.
+
 ## Enact Build Options
 
 The @enact/cli tool will check the project's `package.json` looking for an optional `enact` object for a few customization options:

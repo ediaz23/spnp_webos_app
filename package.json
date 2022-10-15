@@ -53,6 +53,9 @@
 		"webostvjs": "^1.2.5"
 	},
 	"devDependencies": {
-		"@types/webostvjs": "^1.2.0"
+		"@types/webostvjs": "^1.2.0",
+		"del": "^7.0.0",
+		"gulp": "^4.0.2",
+		"gulp-shell": "^0.8.0"
 	}
 }
