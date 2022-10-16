@@ -1,12 +1,17 @@
 {
-	"id": "com.spnp.webos.player",
-	"version": "1.0.0",
-	"vendor": "LGE-SVL",
-	"type": "web",
-	"main": "index.html",
-	"title": "Spnp Player",
-	"icon": "icon.png",
-	"miniicon": "icon-mini.png",
-	"largeIcon": "icon-large.png",
-	"uiRevision": 2
+    "id": "com.spnp.webos.player",
+    "version": "1.0.0",
+    "vendor": "LGE-SVL",
+    "type": "web",
+    "main": "index.html",
+    "title": "Spnp Player",
+    "icon": "icon.png",
+    "miniicon": "icon.png",
+    "largeIcon": "icon.png",
+    "iconColor": "#1c8adb",
+    "uiRevision": 2,
+    "disableBackHistoryAPI": true,
+    "trustLevel": "trusted",
+    "useNativeScroll": true,
+    "voiceControl": "manual"
 }

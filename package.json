@@ -16,8 +16,11 @@
 		"build": "gulp build",
 		"build-p": "gulp build-p",
 		"install-tv": "ares-install bin/com.spnp.webos.player_1.0.0_all.ipk",
+		"install-tv-1": "ares-install -d tv1 bin/com.spnp.webos.player_1.0.0_all.ipk",
 		"start": "ares-launch com.spnp.webos.player",
-		"play": "npm run build && npm run install-tv && npm run start"
+		"start-1": "ares-launch -d tv1 com.spnp.webos.player",
+		"play": "npm run build && npm run install-tv && npm run start",
+		"play-1": "npm run build && npm run install-tv-1 && npm run start-1"
 	},
 	"author": "Esteban Díaz <esteban.diazt23@gmail.com>",
 	"license": "Apache-2.0",

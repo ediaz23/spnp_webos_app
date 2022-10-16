@@ -57,9 +57,14 @@ const makeRequest = async ({ url, method, parameters }) => {
     })
 }
 
-
+/**
+ * @returns {Promise}
+ */
 const startSsdp = async () => makeRequest({ method: 'startSsdp' })
 
+/**
+ * @returns {Promise}
+ */
 const stopSsdp = async () => makeRequest({ method: 'stopSsdp' })
 
 /**
@@ -72,19 +77,19 @@ const searchDevices = async () => makeRequest({ method: 'searchSsdp' })
  * @param {String} [obj.id]
  * @param {Number} [obj.start]
  * @param {Number} [obj.count]
- * @param {String} obj.deviceId
+ * @param {Object} obj.device
  * @returns {Promise<{files: Array<Object>}>}
  */
-const browse = async ({ id, start, count, deviceId }) =>
-    makeRequest({ method: 'browse', parameters: { id, start, count, deviceId } })
+const browse = async ({ id, start, count, device }) =>
+    makeRequest({ method: 'browse', parameters: { id, start, count, deviceData: device } })
 
 /**
  * @param {Object} obj
- * @param {String} obj.deviceId
+ * @param {Object} obj.device
  * @returns {Promise<{capabilities: Array<Object>}>}
  */
-const searchCapabilities = async ({ deviceId }) =>
-    makeRequest({ method: 'searchCapabilities', parameters: { deviceId } })
+const searchCapabilities = async ({ device }) =>
+    makeRequest({ method: 'searchCapabilities', parameters: { deviceData: device } })
 
 /**
  * @param {Object} obj
@@ -92,20 +97,20 @@ const searchCapabilities = async ({ deviceId }) =>
  * @param {Number} [obj.start]
  * @param {Number} [obj.count]
  * @param {String} [obj.query]
- * @param {String} obj.deviceId
+ * @param {Object} obj.device
  * @returns {Promise<{files: Array<Object>}>}
  */
-const search = async ({ id, start, count, query, deviceId }) =>
-    makeRequest({ method: 'search', parameters: { id, start, count, search: query, deviceId } })
+const search = async ({ id, start, count, query, device }) =>
+    makeRequest({ method: 'search', parameters: { id, start, count, search: query, deviceData: device } })
 
 /**
  * @param {Object} obj
  * @param {String} obj.itemId
- * @param {String} obj.deviceId
+ * @param {Object} obj.device
  * @returns {Promise<{files: Object}>}
  */
-const metadata = async ({ itemId, deviceId }) =>
-    makeRequest({ method: 'metadata', parameters: { deviceId, itemId } })
+const metadata = async ({ itemId, device }) =>
+    makeRequest({ method: 'metadata', parameters: { deviceData: device, itemId } })
 
 const mediaTest = async () =>
     makeRequest({ url: 'com.webos.service.mediaindexer', method: 'getDeviceList' })
@@ -120,5 +125,3 @@ export default {
     metadata,
     mediaTest,
 }
-
-//com.webos.service.mediaindexer

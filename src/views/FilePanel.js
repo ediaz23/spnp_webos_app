@@ -91,7 +91,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const fetchData = useCallback(async () => {
         setPanelIndex(PANELS.SEARCHING)
         let data
-        const filter = { deviceId: device.id }
+        const filter = { device }
         if (currentFolder) {
             filter.id = currentFolder.id
         }
