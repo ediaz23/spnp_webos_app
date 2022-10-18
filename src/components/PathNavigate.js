@@ -4,6 +4,7 @@ import { useRecoilState, useRecoilValue } from 'recoil'
 import Item from '@enact/moonstone/Item'
 import css from './PathNavigate.module.less'
 import { filePathState, deviceState } from '../recoilConfig'
+import back from '../back'
 
 
 /**
@@ -22,7 +23,9 @@ const PathNavigate = ({ ...rest }) => {
         if (index === -1) {
             setFilePath([])
         } else if (index + 1 < filePath.length) {
+            const backList = filePath.slice(0, index)
             setFilePath(filePath.slice(0, index + 1))
+            back.replaceHistory({ doBack: () => back.backPath(backList, setFilePath) })
         }
     }, [filePath, setFilePath])
     items.push((

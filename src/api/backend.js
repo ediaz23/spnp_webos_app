@@ -1,9 +1,11 @@
 
 import 'webostvjs'
 import logger from '../logger'
+import utils from '../utils'
+
 
 /** @type {{webOS: import('webostvjs').WebOS}} */
-const { webOS } = window  // eslint-disable-line
+const { webOS } = window
 
 const serviceURL = 'luna://com.spnp.webos.player.service/'
 
@@ -27,8 +29,7 @@ const devRequest = ({ method, parameters, resolver, rejecter }) => {
 
 const makeRequest = async ({ url, method, parameters }) => {
     url = url || serviceURL
-    const isTv = window.PalmServiceBridge || window.PalmServiceBridge
-    if (isTv) {
+    if (utils.isTv()) {
         logger.info(`req plam ${url} - ${method}`)
     } else {
         logger.info(`req ${url} - ${method}`)
@@ -44,7 +45,7 @@ const makeRequest = async ({ url, method, parameters }) => {
             logger.error(error)
             rej(error)
         }
-        if (isTv) {
+        if (utils.isTv()) {
             webOS.service.request(url, {
                 method,
                 parameters,

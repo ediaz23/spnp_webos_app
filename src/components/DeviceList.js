@@ -7,6 +7,7 @@ import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
 import imageCss from './DeviceList.module.less'
 import { deviceState, homeIndexState, filePathState, searchState } from '../recoilConfig'
+import back from '../back'
 
 
 /**
@@ -28,6 +29,7 @@ const DeviceList = ({ id, devices, ...rest }) => {
         setFilePath([])
         setSearch('')
         setHomeIndex(1)
+        back.pushHistory({ doBack: () => setHomeIndex(0) })
     }, [devices, setDevice, setHomeIndex, setFilePath, setSearch])
 
     const renderItem = useCallback(({ index, ...restProps }) => (

@@ -7,6 +7,7 @@ import { useRecoilState } from 'recoil'
 import HomePanel from '../views/HomePanel'
 import PlayerPanel from '../views/PlayerPanel'
 import { pathState } from '../recoilConfig'
+import '../back'
 import './attachErrorHandler'
 
 

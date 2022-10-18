@@ -10,8 +10,5 @@
     "largeIcon": "icon.png",
     "iconColor": "#1c8adb",
     "uiRevision": 2,
-    "disableBackHistoryAPI": true,
-    "trustLevel": "trusted",
-    "useNativeScroll": true,
-    "voiceControl": "manual"
+    "disableBackHistoryAPI": true
 }

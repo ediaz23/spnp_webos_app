@@ -88,21 +88,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const [search, setSearch] = useRecoilState(searchState)
     const [value, setValue] = useState(search)
 
-    const fetchData = useCallback(async () => {
-        setPanelIndex(PANELS.SEARCHING)
-        let data
-        const filter = { device }
-        if (currentFolder) {
-            filter.id = currentFolder.id
-        }
-        if (search) {
-            filter.query = search
-            const res = await backend.search(filter)
-            data = res.files
-        } else {
-            const res = await backend.browse(filter)
-            data = res.files
-        }
+    const setResult = useCallback((data) => {
         if (data && data.length) {
             /** @type {Array<File>} */
             const newData = data.map(toFile)
@@ -111,7 +97,28 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         } else {
             setPanelIndex(PANELS.EMPTY)
         }
-    }, [device, currentFolder, search])
+    }, [])
+
+    const fetchData = useCallback(async () => {
+        setPanelIndex(PANELS.SEARCHING)
+        const filter = { device }
+        if (currentFolder) {
+            filter.id = currentFolder.id
+        }
+        const res = await backend.browse(filter)
+        setResult(res.files)
+    }, [device, currentFolder, setResult])
+
+    const searchButton = useCallback(async () => {
+        setPanelIndex(PANELS.SEARCHING)
+        const filter = { device, query: value }
+        if (currentFolder) {
+            filter.id = currentFolder.id
+        }
+        const res = await backend.search(filter)
+        setResult(res.files)
+        setSearch(value)
+    }, [value, device, currentFolder, setResult, setSearch])
 
     useEffect(() => {
         fetchData().catch(error => {
@@ -124,10 +131,6 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const handleChange = useCallback((ev) => {
         setValue(ev.value);
     }, [])
-
-    const searchButton = useCallback(() => {
-        setSearch(value)
-    }, [value, setSearch])
 
     return (
         <Panel {...rest}>

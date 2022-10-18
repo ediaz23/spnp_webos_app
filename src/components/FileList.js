@@ -9,6 +9,7 @@ import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
 import { pathState, fileState, filePathState } from '../recoilConfig'
 import css from './FileList.module.less'
+import back from '../back'
 
 
 /**
@@ -29,8 +30,16 @@ const FileList = ({ id, files, ...rest }) => {
         if (file.type !== 'folder') {
             setFile(file)
             setPath('/player')
+            back.pushHistory({ doBack: () => setPath('/home') })
         } else {
-            setFilePath(oldList => [...oldList, file])
+            setFilePath(oldList => {
+                if (oldList.length) {
+                    back.replaceHistory({ doBack: () => back.backPath([...oldList], setFilePath) })
+                } else {
+                    back.pushHistory({ doBack: () => setFilePath([]) })
+                }
+                return [...oldList, file]
+            })
         }
     }, [files, setFile, setPath, setFilePath])
 

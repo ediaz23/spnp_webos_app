@@ -1,64 +1,64 @@
 {
-	"name": "com.spnp.webos.player",
-	"version": "1.0.0",
-	"description": "A general template for an Enact Sandstone application for webOS TVs",
-	"main": "src/index.js",
-	"scripts": {
-		"serve": "enact serve",
-		"pack": "enact pack",
-		"pack-p": "enact pack -p",
-		"watch": "enact pack --watch",
-		"clean": "enact clean",
-		"lint": "enact lint .",
-		"license": "enact license",
-		"test": "enact test",
-		"test-watch": "enact test --watch",
-		"build": "gulp build",
-		"build-p": "gulp build-p",
-		"install-tv": "ares-install bin/com.spnp.webos.player_1.0.0_all.ipk",
-		"install-tv-1": "ares-install -d tv1 bin/com.spnp.webos.player_1.0.0_all.ipk",
-		"start": "ares-launch com.spnp.webos.player",
-		"start-1": "ares-launch -d tv1 com.spnp.webos.player",
-		"play": "npm run build && npm run install-tv && npm run start",
-		"play-1": "npm run build && npm run install-tv-1 && npm run start-1"
-	},
-	"author": "Esteban Díaz <esteban.diazt23@gmail.com>",
-	"license": "Apache-2.0",
-	"private": true,
-	"repository": "",
-	"engines": {
-		"npm": ">=6.9.0"
-	},
-	"enact": {
-		"theme": "moonstone"
-	},
-	"eslintConfig": {
-		"extends": "enact/strict"
-	},
-	"eslintIgnore": [
-		"node_modules/*",
-		"build/*",
-		"dist/*"
-	],
-	"dependencies": {
-		"@enact/core": "^4.5.0",
-		"@enact/i18n": "^4.5.0",
-		"@enact/moonstone": "^4.5.0",
-		"@enact/spotlight": "^4.5.0",
-		"@enact/ui": "^4.5.0",
-		"@enact/webos": "^4.5.0",
-		"ilib": "npm:ilib-webos@^14.14.0-webos1",
-		"prop-types": "^15.8.1",
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"recoil": "^0.7.6",
-		"web-vitals": "^2.1.4",
-		"webostvjs": "^1.2.5"
-	},
-	"devDependencies": {
-		"@types/webostvjs": "^1.2.0",
-		"del": "^7.0.0",
-		"gulp": "^4.0.2",
-		"gulp-shell": "^0.8.0"
-	}
+    "name": "com.spnp.webos.player",
+    "version": "1.0.0",
+    "description": "A general template for an Enact Sandstone application for webOS TVs",
+    "main": "src/index.js",
+    "scripts": {
+        "serve": "enact serve",
+        "pack": "enact pack",
+        "pack-p": "enact pack -p",
+        "watch": "enact pack --watch",
+        "clean": "enact clean",
+        "lint": "enact lint .",
+        "license": "enact license",
+        "test": "enact test",
+        "test-watch": "enact test --watch",
+        "build": "gulp build",
+        "build-p": "gulp build-p",
+        "install-tv": "ares-install bin/com.spnp.webos.player_1.0.0_all.ipk",
+        "install-tv-1": "ares-install -d tv1 bin/com.spnp.webos.player_1.0.0_all.ipk",
+        "start": "ares-launch com.spnp.webos.player",
+        "start-1": "ares-launch -d tv1 com.spnp.webos.player",
+        "play": "npm run build && npm run install-tv && npm run start",
+        "play-1": "npm run build && npm run install-tv-1 && npm run start-1"
+    },
+    "author": "Esteban Díaz <esteban.diazt23@gmail.com>",
+    "license": "Apache-2.0",
+    "private": true,
+    "repository": "",
+    "engines": {
+        "npm": ">=6.9.0"
+    },
+    "enact": {
+        "theme": "moonstone"
+    },
+    "eslintConfig": {
+        "extends": ["enact/strict"]
+    },
+    "eslintIgnore": [
+        "node_modules/*",
+        "build/*",
+        "dist/*"
+    ],
+    "dependencies": {
+        "@enact/core": "^4.5.0",
+        "@enact/i18n": "^4.5.0",
+        "@enact/moonstone": "^4.5.0",
+        "@enact/spotlight": "^4.5.0",
+        "@enact/ui": "^4.5.0",
+        "@enact/webos": "^4.5.0",
+        "ilib": "npm:ilib-webos@^14.14.0-webos1",
+        "prop-types": "^15.8.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "recoil": "^0.7.6",
+        "web-vitals": "^2.1.4",
+        "webostvjs": "^1.2.5"
+    },
+    "devDependencies": {
+        "@types/webostvjs": "^1.2.0",
+        "del": "^7.0.0",
+        "gulp": "^4.0.2",
+        "gulp-shell": "^0.8.0"
+    }
 }
