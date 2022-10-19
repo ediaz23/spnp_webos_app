@@ -16,7 +16,6 @@ const popHistory = () => historyStack.pop()
 const replaceHistory = state => { historyStack[historyStack.length - 1] = state }
 
 const doBack = () => {
-    console.log('doBack')
     const state = popHistory()
     state.doBack()
 }

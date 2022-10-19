@@ -18,8 +18,9 @@ const App = ({ ...rest }) => {
     const backHome = useCallback(() => {
         setPath('/home')
     }, [setPath])
+
     return (
-        <RoutablePanels {...rest} path={path}>
+        <RoutablePanels {...rest} path={path} noCloseButton>
             <Route path='home' component={HomePanel} {...rest} />
             <Route path='player' component={PlayerPanel}
                 backHome={backHome} {...rest} />

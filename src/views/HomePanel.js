@@ -9,6 +9,7 @@ import FilePanel from './FilePanel'
 import { homeIndexState } from '../recoilConfig'
 import css from './HomePanel.module.less'
 import back from '../back'
+import utils from '../utils'
 
 
 const HomePanel = ({ spotlightId, ...rest }) => {
@@ -20,11 +21,16 @@ const HomePanel = ({ spotlightId, ...rest }) => {
         }
     }, [setHomeIndex])
 
+    const closeApp = useCallback(() => {
+        if (utils.isTv()) {
+            window.close()
+        }
+    }, [])
     delete rest.hideChildren
     rest.className += ' ' + css.home
     return (
         <ActivityPanels id={spotlightId} index={homeIndex}
-             {...rest} onSelectBreadcrumb={handleBreadcrumb}>
+             {...rest} onSelectBreadcrumb={handleBreadcrumb} onApplicationClose={closeApp}>
             <DevicePanel title={$L('Media Storage')}
                 titleBelow={$L('Select Storage')} {...rest} />
             <FilePanel title={$L('Media Storage')}
