@@ -1,15 +1,12 @@
 
 import { useCallback } from 'react'
 import VirtualList from '@enact/moonstone/VirtualList'
-import Item from '@enact/moonstone/Item'
-import Image from '@enact/moonstone/Image'
-import BodyText from '@enact/moonstone/BodyText'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
 import { pathState, fileState, filePathState } from '../recoilConfig'
-import css from './FileList.module.less'
 import back from '../back'
+import FileListItem from './FileListItem'
 
 
 /**
@@ -44,36 +41,14 @@ const FileList = ({ id, files, ...rest }) => {
     }, [files, setFile, setPath, setFilePath])
 
     const renderItem = useCallback(({ index }) => {
-
-        const cleanDuration = str => str.split('.')[0]
-        /** @param {import('../models/File').default} file */
-        const simple = file => (<BodyText className={css.caption}>{file.title}</BodyText>)
-        /** @param {import('../models/Playable').default} file */
-        const playable = file => (
-            <div className={css.caption}>
-                <BodyText>{file.title}</BodyText>
-                <BodyText>{cleanDuration(file.res.duration)}</BodyText>
-            </div>
-        )
-
-        const item = itemIndex => (
-            <Item key={itemIndex}
-                data-index={itemIndex}
-                className={css.item}
-                index={itemIndex}
-                onClick={selectItem}>
-                <Image className={css.image}
-                    src={files[itemIndex].imageUrl}
-                    style={{ maxHeight: 100, maxWidth: 100 }} />
-                {['folder', 'image'].includes(files[itemIndex].type) && simple(files[itemIndex])}
-                {['video', 'music'].includes(files[itemIndex].type) && playable(files[itemIndex])}
-            </Item>
-        )
-
+        const currentIndex = index << 1
         return (
             <div key={'row' + index}>
-                {item(index << 1)}
-                {(index << 1) + 1 < files.length && item((index << 1) + 1)}
+                <FileListItem itemIndex={currentIndex} selectItem={selectItem}
+                    file={files[currentIndex]} />
+                {currentIndex + 1 < files.length &&
+                    <FileListItem itemIndex={currentIndex + 1} selectItem={selectItem}
+                        file={files[currentIndex + 1]} />}
             </div>
         )
     }, [files, selectItem])
