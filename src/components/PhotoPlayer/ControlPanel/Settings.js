@@ -26,7 +26,7 @@ import Icon from '@enact/moonstone/Icon';
 import RadioItem from '@enact/moonstone/RadioItem';
 import componentCss from './ControlPanel.module.less';
 import { imageSettingState } from '../../../recoilConfig'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState } from 'recoil'
 
 const options = {
     Size: ['Original', 'Full'],
@@ -37,7 +37,7 @@ const SETTING_HEADER = 'Photo Settings';
 
 const Settings = (props) => {
 
-    const [{ currentSettings, settings }, setSettingState] = useSetRecoilState(imageSettingState);
+    const [{ currentSettings, settings }, setSettingState] = useRecoilState(imageSettingState);
     const [index, setIndex] = useState(0);
     const [toggle, setToggle] = useState(false);
     const [header, setHeader] = useState(SETTING_HEADER);

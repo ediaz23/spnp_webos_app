@@ -92,7 +92,6 @@ class PhotoHeader extends Component {
             fileName = currentPhoto && currentPhoto.title ? currentPhoto.title : '',
             size = currentPhoto && currentPhoto.file_size ? this.changeFileSize(currentPhoto.file_size) : 0,
             resolution = this.findResolution(currentPhoto.width, currentPhoto.height),
-            [date, time] = this.getDateTimeFromString(currentPhoto.last_modified_date),
             ariaText = fileName + '\n' + (size ? size : '') + '\n' + (resolution ? resolution : '');
 
         delete rest.currentPhoto;
@@ -124,26 +123,6 @@ class PhotoHeader extends Component {
                     {resolution ?
                         <span>
                             <div className={css.playerInfoSubTitle} aria-label={resolution}>{resolution}</div>
-                        </span> :
-                        null
-                    }
-                </div>
-                <div>
-                    {date ?
-                        <span>
-                            <div className={css.playerInfoSubTitle} aria-label={date}>{date}</div>
-                        </span> :
-                        null
-                    }
-                    {date && time ?
-                        <span>
-                            <div className={css.playerInfoSubTitle}>|</div>
-                        </span> :
-                        null
-                    }
-                    {time ?
-                        <span>
-                            <div className={css.playerInfoSubTitle}>{time}</div>
                         </span> :
                         null
                     }

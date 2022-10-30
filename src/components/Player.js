@@ -1,5 +1,4 @@
 
-import { useCallback } from 'react'
 import PhotoPlayer from './PhotoPlayer/PhotoPlayer'
 //import VideoPlayer from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
@@ -23,23 +22,21 @@ import { fileState } from '../recoilConfig'
 const Player = ({ className, ...rest }) => {
     /** @type {import('../models/Playable').default} */
     const file = useRecoilValue(fileState)
-    const test = useCallback(() => { console.log('mierda') }, [])
     let out
-
+    console.log(`className ${className}`)
     if (file.type === 'image') {
         const [width, height] = file.res.resolution.split('x')
-        const imageList = [{
-            width: width,
-            last_modified_date: file.date,
+        const img = {
+            width: parseInt(width),
             uri: file.res.url,
             title: file.title,
             file_size: file.res.size,
-            height: height,
+            height: parseInt(height),
             file_path: file.res.url
-        }]
+        }
+        const imageList = [img,img,img,img]
         out = (
-            <PhotoPlayer slides={imageList} startSlideIndex={0}
-                handleNavigate={test} {...rest} />
+            <PhotoPlayer slides={imageList} startSlideIndex={0} {...rest} />
         )
     }
 

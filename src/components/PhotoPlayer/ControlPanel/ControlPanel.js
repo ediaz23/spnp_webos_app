@@ -44,7 +44,7 @@ const ControlPanel = ({ iconSize = 'large', onPlaylistOpen, onZoom, rotateImage,
                 size={iconSize}
                 title=""
             >
-                rotate
+                arrowcurveright
             </Icon>
             <Icon
                 aria-label="Zoom"
@@ -65,6 +65,7 @@ const ControlPanel = ({ iconSize = 'large', onPlaylistOpen, onZoom, rotateImage,
             >
                 gear
             </Icon>
+            {onPlaylistOpen && (
             <Icon
                 aria-label="Playlist"
                 className={componentCss.button}
@@ -74,6 +75,7 @@ const ControlPanel = ({ iconSize = 'large', onPlaylistOpen, onZoom, rotateImage,
             >
                 list
             </Icon>
+            )}
         </div>
     );
 };
