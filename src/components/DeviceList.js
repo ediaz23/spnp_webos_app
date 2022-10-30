@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import GridListImageItem from '@enact/moonstone/GridListImageItem'
 import ri from '@enact/ui/resolution'
@@ -18,11 +18,18 @@ import back from '../back'
  */
 const DeviceList = ({ id, devices, ...rest }) => {
 
+    const scrollToRef = useRef(null)
     const setDevice = useSetRecoilState(deviceState)
     const setHomeIndex = useSetRecoilState(homeIndexState)
     const setFilePath = useSetRecoilState(filePathState)
     const setSearch = useSetRecoilState(searchState)
 
+    useEffect(() => {
+        scrollToRef.current({index: 0, animate: false, focus: true});
+    })
+    const getScrollTo = useCallback((scrollTo) => {
+        scrollToRef.current = scrollTo;
+    }, [])
     const selectItem = useCallback(event => {
         const device = devices[parseInt(event.currentTarget.dataset.index)]
         setDevice(device)
@@ -56,6 +63,7 @@ const DeviceList = ({ id, devices, ...rest }) => {
             style={{
                 height: '100%'
             }}
+            cbScrollTo={getScrollTo}
         />
     )
 }
