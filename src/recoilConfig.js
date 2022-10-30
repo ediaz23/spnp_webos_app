@@ -1,5 +1,4 @@
 
-import React from 'react'
 import { atom } from 'recoil'
 
 export const deviceState = atom({
@@ -32,20 +31,18 @@ export const searchState = atom({
     default: ''
 })
 
-export const SettingsContext = React.createContext({
-    settings: [
-        { id: 1, text: 'Size', value: 'Original' },
-        { id: 2, text: 'Transition', value: 'Fade In' },
-        { id: 3, text: 'Speed', value: 'Normal' }
-    ],
-    currentSettings: {
-        Size: 'Original',
-        Transition: 'Fade In',
-        Speed: 'Fast'
-    }
-})
-
 export const imageSettingState = atom({
     key: 'imageSettingState',
-    default: SettingsContext
+    default: {
+        settings: [
+            { id: 1, text: 'Size', value: 'Original' },
+            { id: 2, text: 'Transition', value: 'Fade In' },
+            { id: 3, text: 'Speed', value: 'Normal' }
+        ],
+        currentSettings: {
+            Size: 'Original',
+            Transition: 'Fade In',
+            Speed: 'Fast'
+        }
+    }
 })

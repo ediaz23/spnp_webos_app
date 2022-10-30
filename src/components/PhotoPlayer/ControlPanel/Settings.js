@@ -16,16 +16,17 @@
 
 /* eslint-disable react/jsx-no-bind */
 
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import classNames from 'classnames';
 import { $L } from '@enact/i18n/$L';
 import { spotlightDefaultClass } from '@enact/spotlight/SpotlightContainerDecorator';
 import Group from '@enact/ui/Group';
 import PropTypes from 'prop-types';
-import { SettingsContext } from '../Context/SettingsContext';
 import Icon from '@enact/moonstone/Icon';
 import RadioItem from '@enact/moonstone/RadioItem';
 import componentCss from './ControlPanel.module.less';
+import { imageSettingState } from '../../../recoilConfig'
+import { useSetRecoilState } from 'recoil'
 
 const options = {
     Size: ['Original', 'Full'],
@@ -36,7 +37,7 @@ const SETTING_HEADER = 'Photo Settings';
 
 const Settings = (props) => {
 
-    const { state: { currentSettings, settings }, setSettingState } = useContext(SettingsContext);
+    const [{ currentSettings, settings }, setSettingState] = useSetRecoilState(imageSettingState);
     const [index, setIndex] = useState(0);
     const [toggle, setToggle] = useState(false);
     const [header, setHeader] = useState(SETTING_HEADER);

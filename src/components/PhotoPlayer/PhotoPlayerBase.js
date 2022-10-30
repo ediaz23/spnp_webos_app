@@ -22,7 +22,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 //import { ActionGuide } from '@enact/sandstone/ActionGuide/ActionGuide'
-import { useSettingsContext } from './Context/SettingsContext'
+import { imageSettingState } from '../../recoilConfig'
+import { useRecoilValue } from 'recoil'
 import ControlPanel from './ControlPanel/ControlPanel'
 import Settings from './ControlPanel/Settings'
 import Navigation from './Navigation/Navigation'
@@ -39,8 +40,7 @@ import componentCss from './PhotoPlayer.module.less'
 const slideSpeed = { Slow: 9000, Normal: 6000, Fast: 3000 }
 
 const PhotoPlayerBase = ({ handleNavigate, hideActionGuide, hideZoomUI, slides = [], slideDirection, startSlideIndex = 0 }) => {
-    const settingsContext = useSettingsContext();
-    const contextSettingsState = settingsContext.state || settingsContext;
+    const contextSettingsState = useRecoilValue(imageSettingState);
     const { currentSettings: { Speed, Transition } } = contextSettingsState;
 
     const [firstSlide, secondSlide] = [...slides];

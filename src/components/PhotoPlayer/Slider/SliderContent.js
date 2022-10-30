@@ -16,12 +16,13 @@
 
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import { useSettingsContext } from '../Context/SettingsContext';
 import componentCss from './SliderContent.module.less';
+import { imageSettingState } from '../../../recoilConfig'
+import { useRecoilValue } from 'recoil'
+
 
 const SliderContent = ({ children, translate, transition, width }) => {
-    const stateSettingsContext = useSettingsContext();
-    const contextSettingsState = stateSettingsContext.state || stateSettingsContext;
+    const contextSettingsState = useRecoilValue(imageSettingState);
     const { currentSettings: { Transition } } = contextSettingsState;
     const style = {
         transform: Transition === 'Slide' && `translateX(-${translate}px)`,

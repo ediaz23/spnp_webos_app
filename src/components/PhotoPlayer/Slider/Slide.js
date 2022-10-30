@@ -23,7 +23,8 @@ import Image from '@enact/ui/Image';
 import PropTypes from 'prop-types';
 
 import { getHeight, getWidth } from '../util/util';
-import { useSettingsContext } from '../Context/SettingsContext';
+import { imageSettingState } from '../../../recoilConfig'
+import { useRecoilValue } from 'recoil'
 import onErrorImg from '../../../../assets/photovideo_splash.png';
 import cssComponet from './Slide.module.less';
 
@@ -31,8 +32,7 @@ const Slide = ({ currentSlide, fallBackImg = onErrorImg, imgHeight, imgWidth, is
     const [isImageFailed, setImageFailed] = useState(false);
     const imageSrc = url;
     const sliceRef = useRef();
-    const stateSettingsContext = useSettingsContext();
-    const contextSettingsState = stateSettingsContext.state || stateSettingsContext;
+    const contextSettingsState = useRecoilValue(imageSettingState);
     const { currentSettings: { Size } } = contextSettingsState;
     const innerHeight = getHeight();
     const innerWidth = getWidth();
