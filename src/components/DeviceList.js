@@ -25,18 +25,24 @@ const DeviceList = ({ id, devices, ...rest }) => {
     const setSearch = useSetRecoilState(searchState)
 
     useEffect(() => {
-        scrollToRef.current({index: 0, animate: false, focus: true});
+        scrollToRef.current({ index: 0, animate: false, focus: true })
     })
     const getScrollTo = useCallback((scrollTo) => {
-        scrollToRef.current = scrollTo;
+        scrollToRef.current = scrollTo
     }, [])
     const selectItem = useCallback(event => {
-        const device = devices[parseInt(event.currentTarget.dataset.index)]
+        const index = parseInt(event.currentTarget.dataset.index)
+        const device = devices[index]
         setDevice(device)
         setFilePath([])
         setSearch('')
         setHomeIndex(1)
-        back.pushHistory({ doBack: () => setHomeIndex(0) })
+        back.pushHistory({
+            doBack: () => {
+                setHomeIndex(0)
+                scrollToRef.current({ index, animate: false, focus: true })
+            }
+        })
     }, [devices, setDevice, setHomeIndex, setFilePath, setSearch])
 
     const renderItem = useCallback(({ index, ...restProps }) => (

@@ -1,6 +1,6 @@
 
-import { useCallback } from 'react'
-import VirtualList from '@enact/moonstone/VirtualList'
+import { useCallback, useEffect, useRef } from 'react'
+import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
@@ -17,13 +17,21 @@ import FileListItem from './FileListItem'
  */
 const FileList = ({ id, files, ...rest }) => {
 
+    const scrollToRef = useRef(null)
     const setPath = useSetRecoilState(pathState)
     const setFile = useSetRecoilState(fileState)
     const setFilePath = useSetRecoilState(filePathState)
 
+    useEffect(() => {
+        scrollToRef.current({ index: 0, animate: false, focus: true })
+    })
+    const getScrollTo = useCallback((scrollTo) => {
+        scrollToRef.current = scrollTo
+    }, [])
     const selectItem = useCallback(event => {
+        const index = parseInt(event.currentTarget.dataset.index)
         /** @type {import('../models/File').default} */
-        const file = files[parseInt(event.currentTarget.dataset.index)]
+        const file = files[index]
         if (file.type !== 'folder') {
             setFile(file)
             setPath('/player')
@@ -31,7 +39,7 @@ const FileList = ({ id, files, ...rest }) => {
         } else {
             setFilePath(oldList => {
                 if (oldList.length) {
-                    back.replaceHistory({ doBack: () => back.backPath([...oldList], setFilePath) })
+                    back.replaceHistory({ doBack: () => { back.backPath([...oldList], setFilePath) } })
                 } else {
                     back.pushHistory({ doBack: () => setFilePath([]) })
                 }
@@ -40,29 +48,21 @@ const FileList = ({ id, files, ...rest }) => {
         }
     }, [files, setFile, setPath, setFilePath])
 
-    const renderItem = useCallback(({ index }) => {
-        const currentIndex = index << 1
-        return (
-            <div key={'row' + index}>
-                <FileListItem itemIndex={currentIndex} selectItem={selectItem}
-                    file={files[currentIndex]} />
-                {currentIndex + 1 < files.length &&
-                    <FileListItem itemIndex={currentIndex + 1} selectItem={selectItem}
-                        file={files[currentIndex + 1]} />}
-            </div>
-        )
-    }, [files, selectItem])
-    const size = (files.length >> 1) + (files.length & 1)
+    const renderItem = useCallback(({ index, ...restProps }) => (
+        <FileListItem key={index} selectItem={selectItem}
+            file={files[index]} {...restProps} />
+    ), [files, selectItem])
     return (
-        <VirtualList
+        <VirtualGridList
             {...rest}
-            dataSize={size}
+            dataSize={files.length}
             focusableScrollbar
             id={id}
             itemRenderer={renderItem}
-            itemSize={ri.scale(100)}
+            itemSize={{ minHeight: ri.scale(100), minWidth: ri.scale(840) }}
             spotlightId={id}
             spacing={ri.scale(15)}
+            cbScrollTo={getScrollTo}
         />
     )
 }

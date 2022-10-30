@@ -22,18 +22,13 @@ const FileListItem = kind({
     name: 'FileListItem',
 
     propTypes: {
-        itemIndex: PropTypes.number,
         selectItem: PropTypes.func,
-        file: PropTypes.object,
+        file: PropTypes.object
     },
 
-    render: ({ itemIndex, selectItem, file, ...rest }) => {
+    render: ({ selectItem, file, ...rest }) => {
         return (
-            <Item key={itemIndex}
-                data-index={itemIndex}
-                className={css.item}
-                index={itemIndex}
-                onClick={selectItem} {...rest}>
+            <Item onClick={selectItem} {...rest}>
                 <Image className={css.image}
                     src={file.imageUrl}
                     style={{ maxHeight: 100, maxWidth: 100 }} />
