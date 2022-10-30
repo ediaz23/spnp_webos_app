@@ -19,7 +19,7 @@
 import React, { useCallback } from 'react';
 import { $L } from '@enact/i18n/$L';
 import PropTypes from 'prop-types';
-import Icon from '@enact/sandstone/Icon/Icon';
+import Icon from '@enact/moonstone/Icon';
 import componentCss from './ControlPanel.module.less';
 
 //  A placeholder to set images.

@@ -18,26 +18,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-nested-ternary */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { ActionGuide } from '@enact/sandstone/ActionGuide/ActionGuide';
-import { useSettingsContext } from './Context/SettingsContext';
-import ControlPanel from './ControlPanel/ControlPanel';
-import Settings from './ControlPanel/Settings';
-import Navigation from './Navigation/Navigation';
-import Slide from './Slider/Slide';
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import PropTypes from 'prop-types'
+import classNames from 'classnames'
+//import { ActionGuide } from '@enact/sandstone/ActionGuide/ActionGuide'
+import { useSettingsContext } from './Context/SettingsContext'
+import ControlPanel from './ControlPanel/ControlPanel'
+import Settings from './ControlPanel/Settings'
+import Navigation from './Navigation/Navigation'
+import Slide from './Slider/Slide'
 import SliderContent from './Slider/SliderContent';
-import { debounce, getSlidesOnCurrentIndex, getWidth } from './util/util';
-import listPhotosData from '../../../assets/mock/imageList.json';
-import Icon from '@enact/sandstone/Icon/Icon';
-import ImagePlayList from './ImagePlayList/ImagePlayList';
-import ZoomController from './ZoomController/ZoomController';
-import ImageIndex from './ImageIndex';
-import PhotoHeader from './PhotoHeader/PhotoHeader';
-import componentCss from './PhotoPlayer.module.less';
+import { debounce, getSlidesOnCurrentIndex, getWidth } from './util/util'
+import Icon from '@enact/moonstone/Icon'
+import ImagePlayList from './ImagePlayList/ImagePlayList'
+import ZoomController from './ZoomController/ZoomController'
+import ImageIndex from './ImageIndex'
+import PhotoHeader from './PhotoHeader/PhotoHeader'
+import componentCss from './PhotoPlayer.module.less'
 
-const slideSpeed = { Slow: 9000, Normal: 6000, Fast: 3000 };
+const slideSpeed = { Slow: 9000, Normal: 6000, Fast: 3000 }
 
 const PhotoPlayerBase = ({ handleNavigate, hideActionGuide, hideZoomUI, slides = [], slideDirection, startSlideIndex = 0 }) => {
     const settingsContext = useSettingsContext();
@@ -52,7 +51,8 @@ const PhotoPlayerBase = ({ handleNavigate, hideActionGuide, hideZoomUI, slides =
     const resizeRef = useRef();
 
     const [isPlaying, setPlaying] = useState(false);
-    const [isActionGuideOpen, setActionGuideOpen] = useState(true);
+//    const [isActionGuideOpen, setActionGuideOpen] = useState(true);
+    const isActionGuideOpen = false
     const [isPlaylistOpen, setPlaylistOpen] = useState(false);
     const [showSettings, setSettings] = useState(false);
     const [direction, setDirection] = useState('right'); // eslint-disable-line no-unused-vars
@@ -234,12 +234,13 @@ const PhotoPlayerBase = ({ handleNavigate, hideActionGuide, hideZoomUI, slides =
 
     useEffect(() => {
         const downHandler = ({ keyCode, key }) => {
+            /*
             if ((hideActionGuide.targetKeycodes.includes(keyCode) || key === hideActionGuide.targetKey) && isActionGuideOpen) {
                 setActionGuideOpen(false);
             }
             if ((hideZoomUI.targetKeycodes.includes(keyCode) && !isActionGuideOpen)) {
                 setActionGuideOpen(true);
-            }
+            }*/
             if ((hideZoomUI.targetKeycodes.includes(keyCode) || key === hideZoomUI.targetKey) && !isSlideShowOpen) {
                 setControlsHidden(false);
                 setSlideShowOpen(true);
@@ -273,114 +274,74 @@ const PhotoPlayerBase = ({ handleNavigate, hideActionGuide, hideZoomUI, slides =
     return (
         slides.length > 0 ?
             <div className={componentCss.photoPlayer}>
-                <div
-                    className={classNames({ [componentCss.show]: !showSettings, [componentCss.hide]: showSettings })}
-                    onClick={navigateBack}
-                >
-                    <Icon
-                        className={componentCss.backButton}
-                        size="large"
-                        title=""
-                    >
+                <div className={classNames({ [componentCss.show]: !showSettings, [componentCss.hide]: showSettings })}
+                    onClick={navigateBack}>
+                    <Icon className={componentCss.backButton}
+                        size="large" title="">
                         arrowhookleft
                     </Icon>
                 </div>
-
-                <div
-                    className={classNames({
-                        [componentCss.photoSlider]: true,
-                        [componentCss.hide]: !isSlideShowOpen,
-                        [componentCss.show]: isSlideShowOpen
-                    })}
-                >
-                    <SliderContent
-                        direction={direction}
-                        translate={translate}
-                        transition={transition}
-                        width={getSlideWidth}
-                    >
+                <div className={classNames({
+                    [componentCss.photoSlider]: true,
+                    [componentCss.hide]: !isSlideShowOpen,
+                    [componentCss.show]: isSlideShowOpen
+                })}>
+                    <SliderContent direction={direction} translate={translate}
+                        transition={transition} width={getSlideWidth}>
                         {renderImages()}
                     </SliderContent>
                     {showSettings && <Settings settingsHandler={setSettings} />}
                 </div>
-                <div
-                    className={classNames({ [componentCss.photoZoom]: true, [componentCss.show]: !isSlideShowOpen, [componentCss.hide]: isSlideShowOpen })}
-                >
-                    <ZoomController
-                        imageUrl={slides[activeSlide] && slides[activeSlide].file_path}
-                        setSlideShowOpen={setSlideShowOpen}
-                    />
+                <div className={classNames({ [componentCss.photoZoom]: true, [componentCss.show]: !isSlideShowOpen, [componentCss.hide]: isSlideShowOpen })}>
+                    <ZoomController imageUrl={slides[activeSlide] && slides[activeSlide].file_path}
+                        setSlideShowOpen={setSlideShowOpen} />
                 </div>
-                <div
-                    className={classNames({ [componentCss.controlsWrapper]: true, [componentCss.show]: !isControlsHidden && isSlideShowOpen, [componentCss.hide]: isControlsHidden || !isSlideShowOpen })}
-                >
-                    <div
-                        className={classNames({ [componentCss.photoHeader]: true })}
-                    >
-                        <PhotoHeader
-                            currentPhoto={slides[activeSlide]}
-                        />
+                <div className={classNames({
+                    [componentCss.controlsWrapper]: true,
+                    [componentCss.show]: !isControlsHidden && isSlideShowOpen,
+                    [componentCss.hide]: isControlsHidden || !isSlideShowOpen
+                })}>
+                    <div className={classNames({ [componentCss.photoHeader]: true })}>
+                        <PhotoHeader currentPhoto={slides[activeSlide]} />
                     </div>
-                    <div
-                        className={classNames({ [componentCss.photoIndex]: true })}
-                    >
+                    <div className={classNames({ [componentCss.photoIndex]: true })}>
                         <ImageIndex currentIndex={activeSlide} length={slides.length} />
                     </div>
-                    <div
-                        className={classNames({ [componentCss.navigationsWrapper]: true })}
-                    >
-                        <Navigation
-                            leftIconClick={prevSlide}
-                            rigthIconClick={nextSlide}
-                            isPlaying={isPlaying}
-                            togglePlay={togglePlay}
-                        />
+                    <div className={classNames({ [componentCss.navigationsWrapper]: true })}>
+                        <Navigation leftIconClick={prevSlide} rigthIconClick={nextSlide}
+                            isPlaying={isPlaying} togglePlay={togglePlay} />
                     </div>
-                    <div
-                        className={classNames({ [componentCss.controlPanelWrapper]: true, [componentCss.show]: !isActionGuideOpen, [componentCss.hide]: isActionGuideOpen })}
-                    >
-                        <ControlPanel
-                            onZoom={onZoom}
-                            rotateImage={rotateImage}
-                            settingsHandler={setSettings}
-                            showSettings={showSettings}
-                            onPlaylistOpen={onPlaylistOpen}
-                        />
-                        <div
-                            className={classNames({ [componentCss.imagePlayList]: true, [componentCss.show]: isPlaylistOpen, [componentCss.hide]: !isPlaylistOpen })}
-                        >
-                            <ImagePlayList
-                                imageList={slides}
-                                updateCurrentIndex={updateCurrentIndex}
-                            />
+                    <div className={classNames({
+                        [componentCss.controlPanelWrapper]: true,
+                        [componentCss.show]: !isActionGuideOpen,
+                        [componentCss.hide]: isActionGuideOpen
+                    })}>
+                        <ControlPanel onZoom={onZoom} rotateImage={rotateImage}
+                            settingsHandler={setSettings} showSettings={showSettings}
+                            onPlaylistOpen={onPlaylistOpen} />
+                        <div className={classNames({
+                            [componentCss.imagePlayList]: true,
+                            [componentCss.show]: isPlaylistOpen,
+                            [componentCss.hide]: !isPlaylistOpen
+                        })}>
+                            <ImagePlayList imageList={slides}
+                                updateCurrentIndex={updateCurrentIndex} />
                         </div>
-                    </div>
-
-                    <div
-                        className={classNames({ [componentCss.actionGuideWrapper]: true, [componentCss.show]: isActionGuideOpen, [componentCss.hide]: !isActionGuideOpen })}
-                    >
-                        <ActionGuide onClick={() => setActionGuideOpen(false)} icon="arrowsmalldown">
-                            Press Here to Enable Settings
-                        </ActionGuide>
                     </div>
                 </div>
             </div> :
             <div className={componentCss.photoPlayer}>
-                <div
-                    className={classNames({ [componentCss.show]: !showSettings, [componentCss.hide]: showSettings })}
-                    onClick={navigateBack}
-                >
-                    <Icon
-                        className={componentCss.backButton}
-                        size="large"
-                        title=""
-                    >
+                <div className={classNames({
+                    [componentCss.show]: !showSettings,
+                    [componentCss.hide]: showSettings
+                })} onClick={navigateBack}>
+                    <Icon className={componentCss.backButton} size="large" title="">
                         arrowhookleft
                     </Icon>
                 </div>
             </div>
-    );
-};
+    )
+}
 
 PhotoPlayerBase.defaultProps = {
     hideActionGuide: {
@@ -392,8 +353,7 @@ PhotoPlayerBase.defaultProps = {
         targetKeycodes: [27, 461]
     },
     slideDirection: 'left',
-    slides: listPhotosData.imageList.results
-};
+}
 
 PhotoPlayerBase.propTypes = {
     handleNavigate: PropTypes.func,
@@ -408,9 +368,6 @@ PhotoPlayerBase.propTypes = {
     slideDirection: PropTypes.string,
     slides: PropTypes.array,
     startSlideIndex: PropTypes.number
-};
+}
 
-export default React.memo(PhotoPlayerBase);
-export {
-    PhotoPlayerBase
-};
+export default React.memo(PhotoPlayerBase)

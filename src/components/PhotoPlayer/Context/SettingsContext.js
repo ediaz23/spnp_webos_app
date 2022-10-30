@@ -14,38 +14,26 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext, useReducer } from 'react';
-import SettingsReducer from '../Reducers/SettingsReducer';
+import { useContext } from 'react'
+import { useRecoilState } from 'recoil'
+import { SettingsContext, imageSettingState } from '../../../recoilConfig'
 
-const SettingsContext = React.createContext({
-    settings: [
-        { id: 1, text: 'Size', value: 'Original' },
-        { id: 2, text: 'Transition', value: 'Fade In' },
-        { id: 3, text: 'Speed', value: 'Normal' }
-    ],
-    currentSettings: {
-        Size: 'Original',
-        Transition: 'Fade In',
-        Speed: 'Fast'
-    }
-});
 
 const SettingsProvider = ({ children }) => {
-    const initialState = useContext(SettingsContext);
-    const [state, dispatch] = useReducer(SettingsReducer, initialState);
+    const [state, setSettingState] = useRecoilState(imageSettingState)
 
     return (
-        <SettingsContext.Provider value={{ state, dispatch }}>
+        <SettingsContext.Provider value={{ state, setSettingState }}>
             {children}
         </SettingsContext.Provider>
-    );
-};
+    )
+}
 
-const useSettingsContext = () => useContext(SettingsContext);
+const useSettingsContext = () => useContext(SettingsContext)
 
-export default SettingsProvider;
+export default SettingsProvider
 export {
     SettingsContext,
     SettingsProvider,
     useSettingsContext
-};
+}

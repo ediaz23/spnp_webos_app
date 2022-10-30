@@ -17,7 +17,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Icon from '@enact/sandstone/Icon/Icon';
+import Icon from '@enact/moonstone/Icon';
 import componentCss from './Navigation.module.less';
 
 const Navigation = ({ iconSize = 'large', isPlaying = true, leftIconClick, rigthIconClick, togglePlay }) => {

@@ -17,7 +17,7 @@
 import { useCallback, useRef, useState } from 'react';
 import Image from '@enact/ui/Image';
 import PropTypes from 'prop-types';
-import Slider, { SliderTooltip } from '@enact/sandstone/Slider/Slider';
+import Slider, { SliderTooltip } from '@enact/moonstone/Slider/Slider';
 import { getWidth } from '../util/util';
 import onErrorImg from '../../../../assets/photovideo_splash.png';
 import componentCss from './ZoomController.module.less';

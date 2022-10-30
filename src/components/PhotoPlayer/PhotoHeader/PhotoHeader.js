@@ -20,7 +20,7 @@
  * @module PhotoHeader
  */
 import classNames from 'classnames';
-import { Marquee } from '@enact/sandstone/Marquee/Marquee';
+import { Marquee } from '@enact/moonstone/Marquee/Marquee';
 import PropTypes from 'prop-types';
 import { Component } from 'react';
 import css from './PhotoHeader.module.less';

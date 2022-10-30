@@ -17,8 +17,9 @@
 /* eslint-disable react/jsx-no-bind */
 
 import PropTypes from 'prop-types';
-import ImageItem from '@enact/sandstone/ImageItem/ImageItem';
-import { VirtualGridList } from '@enact/sandstone/VirtualList/VirtualList';
+//import ImageItem from '@enact/sandstone/ImageItem/ImageItem';
+import ImageItem from '@enact/ui/ImageItem';
+import { VirtualGridList } from '@enact/moonstone/VirtualList/VirtualList';
 import ri from '@enact/ui/resolution';
 import placeHolderImg from '../../../../assets/photovideo_splash.png';
 import css from './ImagePlayList.module.less';
