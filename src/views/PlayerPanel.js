@@ -6,7 +6,6 @@ import Player from '../components/Player'
 
 const PlayerPanelBase = ({...rest}) => {
     delete rest.hideChildren
-    delete rest.backHome
     return (
         <Player {...rest} />
     )

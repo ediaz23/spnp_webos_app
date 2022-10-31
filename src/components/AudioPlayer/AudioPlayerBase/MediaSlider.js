@@ -14,11 +14,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { memo } from "react";
+import { memo } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 
-import Slider from "@enact/sandstone/Slider";
+import Slider from "@enact/moonstone/Slider";
 
 import MediaKnob from "./MediaKnob";
 import MediaSliderDecorator from "./MediaSliderDecorator";

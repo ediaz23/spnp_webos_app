@@ -62,11 +62,12 @@ import React, {
     useContext,
     useRef,
     memo,
+    useMemo,
 } from "react";
 import ReactDOM from "react-dom";
-import Skinnable from "@enact/sandstone/Skinnable";
-import Spinner from "@enact/sandstone/Spinner";
-import Button from "@enact/sandstone/Button";
+import Skinnable from "@enact/moonstone/Skinnable";
+import Spinner from "@enact/moonstone/Spinner";
+import Button from "@enact/moonstone/Button";
 import { calcNumberValueOfPlaybackRate } from "./util";
 import Overlay from "./Overlay";
 import Media from "./Media";
@@ -210,7 +211,7 @@ function AudioPlayerBase({
     const prevPropsRef = usePrevious(arguments[0]);
     const context = useContext(FloatingLayerContext);
     const floatingLayerController = useRef();
-    const hideFeedback = () => {
+    const hideFeedback = useCallback(() => {
         if (state.feedbackVisible && state.feedbackAction !== "focus") {
             setSettings((prevState) => ({
                 ...prevState,
@@ -218,11 +219,11 @@ function AudioPlayerBase({
                 feedbackAction: "idle",
             }));
         }
-    };
+    }, [state, setSettings])
 
-    const hideTitle = () => {
+    const hideTitle = useCallback(() => {
         setSettings((prevState) => ({ ...prevState, titleVisible: false }));
-    };
+    }, [setSettings])
 
     const stopDelayedFeedbackHide = useCallback(() => {
         new Job(hideFeedback).stop();
@@ -232,7 +233,7 @@ function AudioPlayerBase({
         new Job(hideTitle).stop();
     }, [hideTitle]);
 
-    const doAutoClose = () => {
+    const doAutoClose = useCallback(() => {
         stopDelayedFeedbackHide();
         stopDelayedTitleHide();
         setSettings((prevState) => ({
@@ -242,10 +243,10 @@ function AudioPlayerBase({
             mediaSliderVisible:
                 prevState.mediaSliderVisible && prevState.miniFeedbackVisible,
             infoVisible: false,
-        }));
-    };
+        }))
+    }, [stopDelayedFeedbackHide, stopDelayedTitleHide])
 
-    const autoCloseJob = new Job(doAutoClose);
+    const autoCloseJob = useMemo(() => new Job(doAutoClose), [doAutoClose])
     const startAutoCloseTimeout = useCallback(() => {
         // If state.more is used as a reference for when this function should fire, timing for
         // detection of when "more" is pressed vs when the state is updated is mismatched. Using an
@@ -294,7 +295,7 @@ function AudioPlayerBase({
             miniFeedbackVisible: false,
             titleVisible: true,
         }));
-    }, [disabled, startDelayedFeedbackHide, startDelayedTitleHide, state]);
+    }, [disabled, startDelayedFeedbackHide, startDelayedTitleHide]);
 
     const showControlsFromPointer = () => {
         Spotlight.setPointerMode(false);
@@ -368,7 +369,7 @@ function AudioPlayerBase({
         [seekDisabled, state.sourceUnavailable]
     );
 
-    const hideMiniFeedback = () => {
+    const hideMiniFeedback = useCallback(() => {
         if (state.miniFeedbackVisible) {
             showMiniFeedback.current = false;
             setSettings((prevState) => ({
@@ -377,9 +378,9 @@ function AudioPlayerBase({
                 miniFeedbackVisible: false,
             }));
         }
-    };
+    }, [state?.miniFeedbackVisible])
 
-    const hideMiniFeedbackJob = new Job(hideMiniFeedback);
+    const hideMiniFeedbackJob = useMemo(() => new Job(hideMiniFeedback), [hideMiniFeedback])
 
     const startDelayedMiniFeedbackHide = useCallback(
         (delay = miniFeedbackHideDelay) => {
@@ -439,14 +440,14 @@ function AudioPlayerBase({
         autoCloseJob.stop();
     }, [autoCloseJob]);
 
-    const renderBottomControl = new Job(() => {
+    const renderBottomControl = useMemo(() => new Job(() => {
         if (!state.bottomControlsRendered) {
             setSettings((prevState) => ({
                 ...prevState,
                 bottomControlsRendered: true,
             }));
         }
-    });
+    }), [state?.bottomControlsRendered])
 
     useEffect(() => {
         on("mousemove", activityDetected);
@@ -653,7 +654,6 @@ function AudioPlayerBase({
             infoVisible: false,
         }));
     }, [
-        state,
         stopAutoCloseTimeout,
         stopDelayedFeedbackHide,
         stopDelayedMiniFeedbackHide,
@@ -722,7 +722,6 @@ function AudioPlayerBase({
             state.currentTime,
             preventTimeChange,
             jump,
-            locale,
         ]
     );
 
@@ -882,7 +881,7 @@ function AudioPlayerBase({
                 }
             }
         },
-        [locale]
+        []
     );
 
     const handleSliderFocus = useCallback(() => {
@@ -909,7 +908,7 @@ function AudioPlayerBase({
                 arguments[0]
             );
         }
-    }, [locale, stopDelayedFeedbackHide]);
+    }, [stopDelayedFeedbackHide]);
 
     const handleSliderBlur = useCallback(() => {
         sliderScrubbing.current = false;
@@ -1130,7 +1129,7 @@ function AudioPlayerBase({
                                         }
                                         value={state.proportionPlayed}
                                         visible={state.mediaSliderVisible}
-                                    ></MediaSlider>
+                                    />
                                     {state.mediaSliderVisible && (
                                         <Times
                                             noCurrentTime

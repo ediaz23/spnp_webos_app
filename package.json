@@ -33,7 +33,9 @@
         "theme": "moonstone"
     },
     "eslintConfig": {
-        "extends": ["enact/strict"]
+        "extends": [
+            "enact/strict"
+        ]
     },
     "eslintIgnore": [
         "node_modules/*",
@@ -49,9 +51,11 @@
         "@enact/webos": "^4.5.0",
         "ilib": "npm:ilib-webos@^14.14.0-webos1",
         "prop-types": "^15.8.1",
+        "ramda": "^0.28.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "recoil": "^0.7.6",
+        "recompose": "^0.30.0",
         "web-vitals": "^2.1.4",
         "webostvjs": "^1.2.5"
     },

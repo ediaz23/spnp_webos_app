@@ -15,9 +15,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from "react";
-import placeHolderImg from "../../../../assets/images/defaultalbum.png";
+import placeHolderImg from "../../../../assets/img/defaultalbum.png";
 import css from "./AlbumInfo.module.less";
 import { getEncodedPath } from "./util";
+import Marquee from '@enact/moonstone/Marquee'
 
 function AlbumInfo({ title, artist, album, thumbnail, isPlaying }) {
     let imgSrc =
@@ -27,9 +28,9 @@ function AlbumInfo({ title, artist, album, thumbnail, isPlaying }) {
     const getTitle = () => {
         if (isPlaying === true) {
             return (
-                <marquee>
+                <Marquee>
                     <p className={css.title}>{title}</p>
-                </marquee>
+                </Marquee>
             );
         } else {
             return <p className={css.title}> {title} </p>;
@@ -40,7 +41,7 @@ function AlbumInfo({ title, artist, album, thumbnail, isPlaying }) {
 
     return (
         <div className={css.album}>
-            <img className={css.albumimage} src={imgSrc} />
+            <img className={css.albumimage} src={imgSrc} alt={'albumimage'} />
             <div className={css.info}>
                 {getTitle()}
                 <p className={css.subtitle}> {artists} </p>

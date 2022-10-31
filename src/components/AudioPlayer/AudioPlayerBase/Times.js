@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { memo } from 'react';
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import { secondsToPeriod, secondsToTime } from './util';
 import css from './AudioPlayer.module.less';

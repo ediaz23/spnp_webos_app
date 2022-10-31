@@ -15,7 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Touchable from '@enact/ui/Touchable';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 

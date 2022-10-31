@@ -15,10 +15,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import ForwardRef from '@enact/ui/ForwardRef';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Marquee from '@enact/sandstone/Marquee';
+import Marquee from '@enact/moonstone/Marquee';
 import css from './AudioPlayer.module.less';
 
 /**

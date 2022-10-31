@@ -34,11 +34,11 @@ import PropTypes from "prop-types";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import $L from "@enact/sandstone/internal/$L";
-import { compareChildren } from "@enact/sandstone/internal/util";
-import Button from "@enact/sandstone/Button";
+import $L from "@enact/moonstone/internal/$L";
+import Button from "@enact/moonstone/Button";
 
 import css from "./MediaControls.module.less";
+import { equals } from 'ramda'
 
 const OuterContainer = SpotlightContainerDecorator(
     {
@@ -62,6 +62,25 @@ const MediaButton = onlyUpdateForKeys([
 ])(Button);
 
 const forwardToggleMore = forward("onToggleMore");
+
+function compareChildren(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    let type = null;
+
+    for (let i = 0; i < a.length; i++) {
+        type = type || typeof a[i];
+
+        if (type === 'string') {
+            if (a[i] !== b[i]) {
+                return false;
+            }
+        } else if (!(0, equals["default"])(a[i], b[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 /**
  * A set of components for controlling media playback and rendering additional components.
