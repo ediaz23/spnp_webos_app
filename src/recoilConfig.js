@@ -6,9 +6,14 @@ export const deviceState = atom({
     default: null
 })
 
-export const fileState = atom({
-    key: 'fileState',
-    default: null
+export const fileIndexState = atom({
+    key: 'fileIndexState',
+    default: -1
+})
+
+export const filesState = atom({
+    key: 'filesState',
+    default: []
 })
 
 export const pathState = atom({

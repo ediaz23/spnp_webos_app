@@ -4,7 +4,7 @@ import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
-import { pathState, fileState, filePathState } from '../recoilConfig'
+import { pathState, fileIndexState, filePathState } from '../recoilConfig'
 import back from '../back'
 import FileListItem from './FileListItem'
 
@@ -19,7 +19,7 @@ const FileList = ({ id, files, ...rest }) => {
 
     const scrollToRef = useRef(null)
     const setPath = useSetRecoilState(pathState)
-    const setFile = useSetRecoilState(fileState)
+    const setFileIndex = useSetRecoilState(fileIndexState)
     const setFilePath = useSetRecoilState(filePathState)
 
     useEffect(() => {
@@ -33,7 +33,7 @@ const FileList = ({ id, files, ...rest }) => {
         /** @type {import('../models/File').default} */
         const file = files[index]
         if (file.type !== 'folder') {
-            setFile(file)
+            setFileIndex(index)
             setPath('/player')
             back.pushHistory({ doBack: () => setPath('/home') })
         } else {
@@ -46,7 +46,7 @@ const FileList = ({ id, files, ...rest }) => {
                 return [...oldList, file]
             })
         }
-    }, [files, setFile, setPath, setFilePath])
+    }, [files, setFileIndex, setPath, setFilePath])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <FileListItem key={index} selectItem={selectItem}

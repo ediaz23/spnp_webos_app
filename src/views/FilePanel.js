@@ -8,7 +8,7 @@ import Input from '@enact/moonstone/Input'
 import $L from '@enact/i18n/$L'
 import PropTypes from 'prop-types'
 import { useRecoilValue, useRecoilState } from 'recoil'
-import { deviceState, filePathState, searchState } from '../recoilConfig'
+import { deviceState, filePathState, searchState, filesState } from '../recoilConfig'
 import MessagePanel from './MessagePanel'
 import FileList from '../components/FileList'
 import PathNavigate from '../components/PathNavigate'
@@ -79,7 +79,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     /** @type {import('../types').Device} */
     const device = useRecoilValue(deviceState)
     /** @type {[files: Array<File>, setDevices: Function]}  */
-    const [files, setFiles] = useState([])
+    const [files, setFiles] = useRecoilState(filesState)
     /** @type {Array<Folder>} */
     const filePath = useRecoilValue(filePathState)
     /** @type {Folder} */
@@ -97,7 +97,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         } else {
             setPanelIndex(PANELS.EMPTY)
         }
-    }, [])
+    }, [setFiles])
 
     const fetchData = useCallback(async () => {
         setPanelIndex(PANELS.SEARCHING)
