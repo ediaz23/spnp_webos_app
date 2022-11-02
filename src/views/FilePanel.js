@@ -1,5 +1,4 @@
 
-import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator'
 import { useEffect, useState, useCallback } from 'react'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import { Cell, Column, Row } from '@enact/ui/Layout'
@@ -171,4 +170,4 @@ FilePanel.propTypes = {
     titleBelow: PropTypes.string,
 }
 
-export default MoonstoneDecorator(FilePanel)
+export default FilePanel

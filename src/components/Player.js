@@ -1,11 +1,11 @@
 
-import { useCallback } from 'react'
-import PhotoPlayer from './PhotoPlayer/PhotoPlayer'
-import AudioPlayer from './AudioPlayer/AudioPlayer'
+// import { useCallback } from 'react'
+// import PhotoPlayer from './PhotoPlayer/PhotoPlayer'
+// import AudioPlayer from './AudioPlayer/AudioPlayer'
 //import VideoPlayer from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
-import { useRecoilValue, useRecoilState } from 'recoil'
-import { fileIndexState, filesState } from '../recoilConfig'
+// import { useRecoilValue, useRecoilState } from 'recoil'
+// import { fileIndexState, filesState } from '../recoilConfig'
 //import css from './Player.module.less'
 
 /**
@@ -23,10 +23,11 @@ import { fileIndexState, filesState } from '../recoilConfig'
  */
 const Player = ({ backHome, className, ...rest }) => {
     /** @type {[Number, Function]} */
-    const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
+    // const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
     /** @type {Array<import('../models/File').default} */
-    const files = useRecoilValue(filesState)
+    // const files = useRecoilValue(filesState)
     /** @type {import('../models/Playable').default} */
+    /*
     const file = files[fileIndex]
     const nextFile = useCallback(() => {
         if (fileIndex + 1 < files.length) {
@@ -47,33 +48,11 @@ const Player = ({ backHome, className, ...rest }) => {
         } else {
             backHome()
         }
-    }, [setFileIndex, fileIndex, backHome, files])
-
-
-    let out
-    console.log(`className ${className}`)
-    if (file.type === 'image') {
-        /** @type {import('../models/Image').default} */
-        const image = file
-        const [width, height] = image.res.resolution.split('x')
-        const img = {
-            width: parseInt(width),
-            uri: image.res.url,
-            title: image.title,
-            file_size: image.res.size,
-            height: parseInt(height),
-            file_path: image.res.url
-        }
-        const imageList = [img, img, img, img]
-        out = (<PhotoPlayer slides={imageList} startSlideIndex={0} {...rest} />)
-    } else if (file.type === 'music') {
-        out = (<AudioPlayer handleNext={nextFile} handlePrevious={prevFile} song={file} {...rest} />)
-    } else {
-        backHome()
-        out = (<></>)
-    }
-    console.log('<Player>')
-    return out
+    }, [setFileIndex, fileIndex, backHome, files]) */
+    console.log(backHome)
+    console.log(className)
+    console.log(rest)
+    return (<div>Probando</div>)
 }
 
 Player.propTypes = {
