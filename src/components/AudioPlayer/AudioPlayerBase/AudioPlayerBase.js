@@ -252,7 +252,7 @@ function AudioPlayerBase({
         // detection of when "more" is pressed vs when the state is updated is mismatched. Using an
         // instance variable that's only set and used for this express purpose seems cleanest.
         if (autoCloseTimeout && state.mediaControlsVisible) {
-            // autoCloseJob.startAfter(autoCloseTimeout);
+//            autoCloseJob.startAfter(autoCloseTimeout);
         }
     }, [autoCloseTimeout, state.mediaControlsVisible]);
 

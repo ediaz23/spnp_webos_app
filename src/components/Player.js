@@ -72,7 +72,7 @@ const Player = ({ backHome, className, ...rest }) => {
         backHome()
         out = (<></>)
     }
-
+    console.log('<Player>')
     return out
 }
 

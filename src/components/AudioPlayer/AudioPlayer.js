@@ -27,7 +27,6 @@ import AudioPlayerBase from "./AudioPlayerBase/AudioPlayerBase";
  * @param {import('../../models/Music').default} obj.song
  */
 const AudioPlayer = ({ handleNext, handlePrevious, song, ...rest }) => {
-    console.log(song)
     return (
         <AudioPlayerBase
             {...rest}

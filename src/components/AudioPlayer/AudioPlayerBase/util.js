@@ -99,14 +99,22 @@ const calcNumberValueOfPlaybackRate = (rate) => {
  */
 const countReactChildren = (children) =>
     React.Children.toArray(children).filter((n) => n != null).length;
+
+/**
+ * @param {String} path
+ */
 const getEncodedPath = (path) => {
     let encodedPath = "";
     if (path && path.length > 0) {
-        encodedPath = encodeURIComponent(path);
-        if (path && path.substring(0, 1) === "/") {
-            encodedPath = "file:///" + encodedPath;
+        if (path.startsWith('http')) {
+            encodedPath = path
+        } else {
+            encodedPath = encodeURIComponent(path);
+            if (path && path.substring(0, 1) === "/") {
+                encodedPath = "file:///" + encodedPath;
+            }
+            encodedPath = encodedPath.replace(/ /g, "%20");
         }
-        encodedPath = encodedPath.replace(/ /g, "%20");
     }
     return encodedPath;
 };
