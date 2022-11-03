@@ -1,34 +1,25 @@
 
-// import { useCallback } from 'react'
-// import PhotoPlayer from './PhotoPlayer/PhotoPlayer'
-// import AudioPlayer from './AudioPlayer/AudioPlayer'
-//import VideoPlayer from '@enact/moonstone/VideoPlayer'
+ import { useCallback } from 'react'
+import VideoPlayer from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
-// import { useRecoilValue, useRecoilState } from 'recoil'
-// import { fileIndexState, filesState } from '../recoilConfig'
-//import css from './Player.module.less'
+import { useRecoilValue, useRecoilState } from 'recoil'
+import { fileIndexState, filesState } from '../recoilConfig'
+import silent from '../../assets/silent.ogg'
 
-/**
-        <VideoPlayer {...rest} className={className + css.player + ' enact-fit'}>
-            <source src={file.res.url} type={file.mimeType} />
-            <infoComponents>
-                {file.title}
-            </infoComponents>
-        </VideoPlayer>
- */
+
 /**
  * @param {Object} obj
  * @param {String} obj.className
  * @param {Object} obj.rest
  */
-const Player = ({ backHome, className, ...rest }) => {
+const Player = ({ backHome, ...rest }) => {
     /** @type {[Number, Function]} */
-    // const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
+    const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
     /** @type {Array<import('../models/File').default} */
-    // const files = useRecoilValue(filesState)
+    const files = useRecoilValue(filesState)
     /** @type {import('../models/Playable').default} */
-    /*
     const file = files[fileIndex]
+
     const nextFile = useCallback(() => {
         if (fileIndex + 1 < files.length) {
             setFileIndex(fileIndex + 1)
@@ -48,15 +39,40 @@ const Player = ({ backHome, className, ...rest }) => {
         } else {
             backHome()
         }
-    }, [setFileIndex, fileIndex, backHome, files]) */
-    console.log(backHome)
-    console.log(className)
-    console.log(rest)
-    return (<div>Probando</div>)
+    }, [setFileIndex, fileIndex, backHome, files])
+    let title = file.title, mimeType = file.mimeType, source = file.res.url, imageUrl = file.imageUrl
+
+    if (file.type === 'music') {
+        /** @type {import('../models/Music').default} */
+        const music = file
+        const tmp = []
+        if (music.title) {
+            tmp.push(music.title)
+        }
+        if (music.artist) {
+            tmp.push(music.artist)
+        }
+        if (music.album) {
+            tmp.push(music.album)
+        }
+        title = tmp.join(' - ')
+    } else if (file.type === 'image') {
+        mimeType = 'audio/ogg'
+        source = silent
+        imageUrl = file.res.url
+    }
+    return (
+        <div className={rest.className}>
+            <VideoPlayer title={title} poster={imageUrl} {...rest}
+                onJumpBackward={prevFile}
+                onJumpForward={nextFile} >
+                <source src={source} type={mimeType} />
+            </VideoPlayer>
+        </div>
+    )
 }
 
 Player.propTypes = {
-    className: PropTypes.string,
     backHome: PropTypes.func,
 }
 
