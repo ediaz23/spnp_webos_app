@@ -43,6 +43,7 @@
         "dist/*"
     ],
     "dependencies": {
+        "@cospired/i18n-iso-languages": "^4.0.0",
         "@enact/core": "^4.5.0",
         "@enact/i18n": "^4.5.0",
         "@enact/moonstone": "^4.5.0",
