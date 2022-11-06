@@ -1,5 +1,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
+import Spinner from '@enact/moonstone/Spinner'
+import Popup from '@enact/moonstone/Popup'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import { Cell, Column, Row } from '@enact/ui/Layout'
 import IconButton from '@enact/moonstone/IconButton'
@@ -8,7 +10,6 @@ import $L from '@enact/i18n/$L'
 import PropTypes from 'prop-types'
 import { useRecoilValue, useRecoilState } from 'recoil'
 import { deviceState, filePathState, searchState, filesState } from '../recoilConfig'
-import MessagePanel from './MessagePanel'
 import FileList from '../components/FileList'
 import PathNavigate from '../components/PathNavigate'
 import backend from '../api/backend'
@@ -18,14 +19,6 @@ import Image from '../models/Image'
 import Music from '../models/Music'
 import Video from '../models/Video'
 
-
-const PANELS = {
-    INIT: 0,
-    SEARCHING: 1,
-    EMPTY: 2,
-    ERROR: 3,
-    RESULT: 4,
-}
 
 /**
  * @param {Object} file
@@ -83,59 +76,74 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const filePath = useRecoilValue(filePathState)
     /** @type {Folder} */
     const currentFolder = filePath.length ? filePath[filePath.length - 1] : null
-    const [panelIndex, setPanelIndex] = useState(0)
+    /** @type {[search: String, setSearch: Function]}  */
     const [search, setSearch] = useRecoilState(searchState)
+    /** @type {[value: String, setValue: Function]}  */
     const [value, setValue] = useState(search)
+    /** @type {[isLoading: Boolean, setIsLoading: Function]}  */
+    const [isLoading, setIsLoading] = useState(true)
+    /** @type {[message: String, setMessage: Function]}  */
+    const [message, setMessage] = useState('')
 
     const setResult = useCallback((data) => {
         if (data && data.length) {
             /** @type {Array<File>} */
             const newData = data.map(toFile)
             setFiles(newData.sort(sortFiles))
-            setPanelIndex(PANELS.RESULT)
         } else {
-            setPanelIndex(PANELS.EMPTY)
+            setFiles([])
+            setMessage($L('No file was found.'))
         }
     }, [setFiles])
 
+    const handelError = useCallback(error => {
+        console.error('Error fetching devices')
+        console.error(error)
+        setMessage($L('Error searching files.'))
+    }, [setMessage])
+
     const fetchData = useCallback(async () => {
-        setPanelIndex(PANELS.SEARCHING)
-        const filter = { device }
-        if (currentFolder) {
-            filter.id = currentFolder.id
-        }
-        const res = await backend.browse(filter)
-        setResult(res.files)
-    }, [device, currentFolder, setResult])
+        setIsLoading(true)
+        try {
+            const filter = { device }
+            if (currentFolder) {
+                filter.id = currentFolder.id
+            }
+            const res = await backend.browse(filter)
+            setResult(res.files)
+        } catch (error) { handelError(error) }
+        finally { setIsLoading(false) }
+    }, [device, currentFolder, setResult, handelError])
 
     const searchButton = useCallback(async () => {
-        setPanelIndex(PANELS.SEARCHING)
-        const filter = { device, query: value }
-        if (currentFolder) {
-            filter.id = currentFolder.id
-        }
-        const res = await backend.search(filter)
-        setResult(res.files)
-        setSearch(value)
-    }, [value, device, currentFolder, setResult, setSearch])
+        setIsLoading(true)
+        try {
+            const filter = { device, query: value }
+            if (currentFolder) {
+                filter.id = currentFolder.id
+            }
+            const res = await backend.search(filter)
+            setResult(res.files)
+            setSearch(value)
+        } catch (error) { handelError(error) }
+        finally { setIsLoading(false) }
+    }, [value, device, currentFolder, setResult, setSearch, handelError])
 
-    useEffect(() => {
-        fetchData().catch(error => {
-            console.error('Error fetching devices')
-            console.error(error)
-            setPanelIndex(PANELS.ERROR)
-        })
-    }, [fetchData])
+    const handleChange = useCallback((ev) => { setValue(ev.value) }, [])
+    const handleOnClose = useCallback(() => { setMessage('') }, [])
+    const refreshData = useCallback(() => {
+        fetchData()
+        setSearch('')
+    }, [fetchData, setSearch])
 
-    const handleChange = useCallback((ev) => {
-        setValue(ev.value);
-    }, [])
+    useEffect(() => { fetchData() }, [fetchData])
 
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} >
                 <Input placeholder={$L('Search')} value={value} onChange={handleChange} />
                 <IconButton size="small" onClick={searchButton}>search</IconButton>
+                <IconButton size="small" onClick={refreshData}>refresh</IconButton>
             </Header>
             <Row style={{ height: '100%' }}>
                 <Cell>
@@ -144,15 +152,10 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
                             <PathNavigate />
                         </Cell>
                         <Cell>
-                            {panelIndex === PANELS.INIT &&
-                                <MessagePanel message={$L('Hellow')} />}
-                            {panelIndex === PANELS.SEARCHING &&
-                                <MessagePanel message={$L('Searching files.')} />}
-                            {panelIndex === PANELS.EMPTY &&
-                                <MessagePanel message={$L('No file was found.')} />}
-                            {panelIndex === PANELS.ERROR &&
-                                <MessagePanel message={$L('Error searching files.')} />}
-                            {panelIndex === PANELS.RESULT &&
+                            {isLoading &&
+                                <Spinner transparent centered>{$L('Loading...')}</Spinner>
+                            }
+                            {!isLoading && files.length > 0 &&
                                 <FileList id={spotlightId} files={files}
                                     index={rest['data-index']} />
                             }
@@ -160,6 +163,9 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
                     </Column>
                 </Cell>
             </Row>
+            <Popup onClose={handleOnClose} open={!!message} showCloseButton>
+                {message}
+            </Popup>
         </Panel>
     )
 }

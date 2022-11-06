@@ -1,9 +1,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
+import Spinner from '@enact/moonstone/Spinner'
+import Popup from '@enact/moonstone/Popup'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import $L from '@enact/i18n/$L'
 import PropTypes from 'prop-types'
-import MessagePanel from './MessagePanel'
 import backend from '../api/backend'
 import DeviceList from '../components/DeviceList'
 import wifi0 from '../../assets/img/wifi.png'
@@ -13,56 +14,52 @@ import wifi3 from '../../assets/img/wifi3.png'
 
 
 const wifiImg = [wifi0, wifi1, wifi2, wifi3]
-const PANELS = {
-    INIT: 0,
-    SEARCHING: 1,
-    EMPTY: 2,
-    ERROR: 3,
-    RESULT: 4,
-}
+
 
 const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     /** @type {[devices: Array, setDevices: Function]}  */
     const [devices, setDevices] = useState([])
-    const [panelIndex, setPanelIndex] = useState(0)
+    /** @type {[isLoading: Boolean, setIsLoading: Function]}  */
+    const [isLoading, setIsLoading] = useState(true)
+    /** @type {[message: String, setMessage: Function]}  */
+    const [message, setMessage] = useState('')
 
     const fetchData = useCallback(async () => {
-        setPanelIndex(PANELS.SEARCHING)
-
-        await backend.startSsdp()
-        const { devices: data } = await backend.searchDevices()
-        if (data && data.length) {
-            setDevices(data.map((dev, index) => {
-                return { ...dev, image: wifiImg[index % wifiImg.length], source: 'wifi' }
-            }))
-            setPanelIndex(PANELS.RESULT)
-        } else {
-            setPanelIndex(PANELS.EMPTY)
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchData().catch(error => {
+        setIsLoading(true)
+        try {
+            await backend.startSsdp()
+            const { devices: data } = await backend.searchDevices()
+            if (data && data.length) {
+                setDevices(data.map((dev, index) => {
+                    return { ...dev, image: wifiImg[index % wifiImg.length], source: 'wifi' }
+                }))
+            } else {
+                setDevices([])
+                setMessage($L('No device was found.'))
+            }
+        } catch (error) {
             console.error('Error fetching devices')
             console.error(error)
-            setPanelIndex(PANELS.ERROR)
-        })
-    }, [fetchData])
+            setMessage($L('Error searching devices.'))
+        } finally { setIsLoading(false) }
+    }, [])
+
+    useEffect(() => { fetchData() }, [fetchData])
+    const handleOnClose = useCallback(() => { setMessage('') }, [])
+
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow} />
-            {panelIndex === PANELS.INIT &&
-                <MessagePanel message={$L('Hellow')} />}
-            {panelIndex === PANELS.SEARCHING &&
-                <MessagePanel message={$L('Searching devices.')} />}
-            {panelIndex === PANELS.EMPTY &&
-                <MessagePanel message={$L('No device was found.')} />}
-            {panelIndex === PANELS.ERROR &&
-                <MessagePanel message={$L('Error searching devices.')} />}
-            {panelIndex === PANELS.RESULT &&
+            {isLoading &&
+                <Spinner transparent centered>{$L('Loading...')}</Spinner>
+            }
+            {!isLoading && devices.length > 0 &&
                 <DeviceList id={spotlightId} devices={devices}
                     index={rest['data-index']} />
             }
+            <Popup onClose={handleOnClose} open={!!message} showCloseButton>
+                {message}
+            </Popup>
         </Panel>
     )
 }
