@@ -1,9 +1,10 @@
 
 import { useCallback } from 'react'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilValue } from 'recoil'
 import Item from '@enact/moonstone/Item'
 import css from './PathNavigate.module.less'
 import { filePathState, deviceState } from '../recoilConfig'
+import useSetFilePath from '../hooks/setFilePath'
 import back from '../back'
 
 
@@ -13,8 +14,9 @@ import back from '../back'
 const PathNavigate = ({ ...rest }) => {
     /** @type {import('../types').Device} */
     const device = useRecoilValue(deviceState)
-    /** @type {[filePath: Array<import('../models/Folder').default>, setFilePath: function]} */
-    const [filePath, setFilePath] = useRecoilState(filePathState)
+    /** @type {Array<import('../models/Folder').default>} */
+    const filePath = useRecoilValue(filePathState)
+    const setFilePath = useSetFilePath()
     const items = []
     let key = 1
     const popFolder = useCallback(event => {

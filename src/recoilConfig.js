@@ -8,7 +8,7 @@ export const deviceState = atom({
 
 export const fileIndexState = atom({
     key: 'fileIndexState',
-    default: -1
+    default: 0
 })
 
 export const filesState = atom({

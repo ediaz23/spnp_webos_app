@@ -20,7 +20,10 @@ const doBack = () => {
     state.doBack()
 }
 
-/** @param {Array} backList*/
+/**
+ * @param {Array} backList
+ * @param {Function} setFilePath
+ */
 const backPath = (backList, setFilePath) => {
     if (backList.length) {
         const backList2 = backList.slice(0, backList.length - 1)

@@ -70,19 +70,19 @@ const sortFiles = (a, b) => {
 const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     /** @type {import('../types').Device} */
     const device = useRecoilValue(deviceState)
-    /** @type {[files: Array<File>, setDevices: Function]}  */
+    /** @type {[Array<File>, Function]}  */
     const [files, setFiles] = useRecoilState(filesState)
     /** @type {Array<Folder>} */
     const filePath = useRecoilValue(filePathState)
     /** @type {Folder} */
     const currentFolder = filePath.length ? filePath[filePath.length - 1] : null
-    /** @type {[search: String, setSearch: Function]}  */
+    /** @type {[String, Function]}  */
     const [search, setSearch] = useRecoilState(searchState)
-    /** @type {[value: String, setValue: Function]}  */
+    /** @type {[String, Function]}  */
     const [value, setValue] = useState(search)
-    /** @type {[isLoading: Boolean, setIsLoading: Function]}  */
-    const [isLoading, setIsLoading] = useState(true)
-    /** @type {[message: String, setMessage: Function]}  */
+    /** @type {[Boolean, Function]}  */
+    const [isLoading, setIsLoading] = useState(false)
+    /** @type {[String, Function]}  */
     const [message, setMessage] = useState('')
 
     const setResult = useCallback((data) => {
@@ -134,9 +134,14 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const refreshData = useCallback(() => {
         fetchData()
         setSearch('')
+        setValue('')
     }, [fetchData, setSearch])
 
-    useEffect(() => { fetchData() }, [fetchData])
+    useEffect(() => {
+        if (files === null) {
+            fetchData()
+        }
+    }, [fetchData, files])
 
     return (
         <Panel {...rest}>
@@ -155,7 +160,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
                             {isLoading &&
                                 <Spinner transparent centered>{$L('Loading...')}</Spinner>
                             }
-                            {!isLoading && files.length > 0 &&
+                            {!isLoading && files !== null && files.length > 0 &&
                                 <FileList id={spotlightId} files={files}
                                     index={rest['data-index']} />
                             }

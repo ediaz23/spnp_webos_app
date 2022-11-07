@@ -13,6 +13,7 @@ import utils from '../utils'
 
 
 const HomePanel = ({ spotlightId, ...rest }) => {
+    /** @type {[Number, Function]} */
     const [homeIndex, setHomeIndex] = useRecoilState(homeIndexState)
     const handleBreadcrumb = useCallback(event => {
         if (event.type === 'onSelect') {
@@ -27,12 +28,12 @@ const HomePanel = ({ spotlightId, ...rest }) => {
         }
     }, [])
     delete rest.hideChildren
-    const newRest = {...rest}
+    const newRest = { ...rest }
     newRest.className = rest.className + ' ' + css.home
     return (
         <ActivityPanels id={spotlightId} index={homeIndex}
-             {...rest} onSelectBreadcrumb={handleBreadcrumb}
-             onApplicationClose={closeApp}>
+            {...rest} onSelectBreadcrumb={handleBreadcrumb}
+            onApplicationClose={closeApp}>
             <DevicePanel title={$L('Media Storage')}
                 titleBelow={$L('Select Storage')} {...newRest} />
             <FilePanel title={$L('Media Storage')}

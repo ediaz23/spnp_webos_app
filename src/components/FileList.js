@@ -3,8 +3,9 @@ import { useCallback, useEffect, useRef } from 'react'
 import { VirtualGridList } from '@enact/moonstone/VirtualList'
 import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
-import { useSetRecoilState } from 'recoil'
-import { pathState, fileIndexState, filePathState } from '../recoilConfig'
+import { useSetRecoilState, useRecoilState } from 'recoil'
+import { pathState, fileIndexState } from '../recoilConfig'
+import useSetFilePath from '../hooks/setFilePath'
 import back from '../back'
 import FileListItem from './FileListItem'
 
@@ -16,18 +17,15 @@ import FileListItem from './FileListItem'
  * @param {Object} obj.rest
  */
 const FileList = ({ id, files, ...rest }) => {
-
     const scrollToRef = useRef(null)
+    /** @type {Function} */
     const setPath = useSetRecoilState(pathState)
-    const setFileIndex = useSetRecoilState(fileIndexState)
-    const setFilePath = useSetRecoilState(filePathState)
+    /** @type {[Number, Function]} */
+    const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
+    /** @type {Function} */
+    const setFilePath = useSetFilePath()
 
-    useEffect(() => {
-        scrollToRef.current({ index: 0, animate: false, focus: true })
-    })
-    const getScrollTo = useCallback((scrollTo) => {
-        scrollToRef.current = scrollTo
-    }, [])
+    const getScrollTo = useCallback((scrollTo) => { scrollToRef.current = scrollTo }, [])
     const selectItem = useCallback(event => {
         const index = parseInt(event.currentTarget.dataset.index)
         /** @type {import('../models/File').default} */
@@ -39,12 +37,13 @@ const FileList = ({ id, files, ...rest }) => {
         } else {
             setFilePath(oldList => {
                 if (oldList.length) {
-                    back.replaceHistory({ doBack: () => { back.backPath([...oldList], setFilePath) } })
+                    back.replaceHistory({ doBack: () => back.backPath([...oldList], setFilePath) })
                 } else {
-                    back.pushHistory({ doBack: () => setFilePath([]) })
+                    back.pushHistory({ doBack: () => { setFilePath([]) } })
                 }
                 return [...oldList, file]
             })
+            setFileIndex(0)
         }
     }, [files, setFileIndex, setPath, setFilePath])
 
@@ -52,6 +51,9 @@ const FileList = ({ id, files, ...rest }) => {
         <FileListItem key={index} selectItem={selectItem}
             file={files[index]} {...restProps} />
     ), [files, selectItem])
+
+    useEffect(() => { scrollToRef.current({ index: fileIndex, animate: false, focus: true }) })
+
     return (
         <VirtualGridList
             {...rest}

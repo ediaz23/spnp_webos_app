@@ -6,7 +6,8 @@ import ri from '@enact/ui/resolution'
 import PropTypes from 'prop-types'
 import { useSetRecoilState } from 'recoil'
 import imageCss from './DeviceList.module.less'
-import { deviceState, homeIndexState, filePathState, searchState } from '../recoilConfig'
+import { deviceState, homeIndexState, searchState } from '../recoilConfig'
+import useSetFilePath from '../hooks/setFilePath'
 import back from '../back'
 
 
@@ -17,19 +18,17 @@ import back from '../back'
  * @param {Object} obj.rest
  */
 const DeviceList = ({ id, devices, ...rest }) => {
-
     const scrollToRef = useRef(null)
+    /** @type {Function} */
     const setDevice = useSetRecoilState(deviceState)
+    /** @type {Function} */
     const setHomeIndex = useSetRecoilState(homeIndexState)
-    const setFilePath = useSetRecoilState(filePathState)
+    /** @type {Function} */
+    const setFilePath = useSetFilePath()
+    /** @type {Function} */
     const setSearch = useSetRecoilState(searchState)
 
-    useEffect(() => {
-        scrollToRef.current({ index: 0, animate: false, focus: true })
-    })
-    const getScrollTo = useCallback((scrollTo) => {
-        scrollToRef.current = scrollTo
-    }, [])
+    const getScrollTo = useCallback((scrollTo) => { scrollToRef.current = scrollTo }, [])
     const selectItem = useCallback(event => {
         const index = parseInt(event.currentTarget.dataset.index)
         const device = devices[index]
@@ -56,6 +55,8 @@ const DeviceList = ({ id, devices, ...rest }) => {
             css={{ image: imageCss.imageFix }}
         />
     ), [devices, selectItem])
+
+    useEffect(() => { scrollToRef.current({ index: 0, animate: false, focus: true }) })
 
     return (
         <VirtualGridList

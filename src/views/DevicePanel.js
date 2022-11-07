@@ -17,11 +17,11 @@ const wifiImg = [wifi0, wifi1, wifi2, wifi3]
 
 
 const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
-    /** @type {[devices: Array, setDevices: Function]}  */
+    /** @type {[Array, Function]}  */
     const [devices, setDevices] = useState([])
-    /** @type {[isLoading: Boolean, setIsLoading: Function]}  */
+    /** @type {[Boolean, Function]}  */
     const [isLoading, setIsLoading] = useState(true)
-    /** @type {[message: String, setMessage: Function]}  */
+    /** @type {[String, Function]}  */
     const [message, setMessage] = useState('')
 
     const fetchData = useCallback(async () => {
@@ -44,8 +44,8 @@ const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         } finally { setIsLoading(false) }
     }, [])
 
-    useEffect(() => { fetchData() }, [fetchData])
     const handleOnClose = useCallback(() => { setMessage('') }, [])
+    useEffect(() => { fetchData() }, [fetchData])
 
     return (
         <Panel {...rest}>

@@ -4,7 +4,6 @@ import IconButton from '@enact/moonstone/IconButton'
 import ContextualPopupDecorator from '@enact/moonstone/ContextualPopupDecorator'
 import VideoPlayer, { MediaControls } from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
-import $L from '@enact/i18n/$L'
 import { useRecoilValue, useRecoilState } from 'recoil'
 import { fileIndexState, filesState } from '../recoilConfig'
 import silent from '../../assets/silent.ogg'
@@ -29,6 +28,10 @@ const Player = ({ backHome, ...rest }) => {
     const file = files[fileIndex]
     /** @type {[Boolean, Function]} */
     const [showAudioList, setShowAudioList] = useState(false)
+    /** @type {[Boolean, Function]} */
+    const [showAudioBtn, setShowAudioBtn] = useState(false)
+    /** @type {[Boolean, Function]} */
+    const [showSubtitleBtn, setShowSubtitleBtn] = useState(false)
 
     const nextFile = useCallback(() => {
         if (fileIndex + 1 < files.length) {
@@ -79,10 +82,24 @@ const Player = ({ backHome, ...rest }) => {
         passNextFile = !video.canPlayType(mimeType)
     }
 
+    /**
+     * @todo falta los subitulos.
+     */
     const setMediaRef = useCallback(node => {
         if (node) {
+            /** @type {HTMLVideoElement} */
             const video = document.querySelector('video')
             video.onended = nextFile
+            video.onloadedmetadata = () => {
+                /** @type {{audioTracks: Array, textTracks: Array}} */
+                const { audioTracks, textTracks } = video
+                if (audioTracks && audioTracks.length > 1) {
+                    setShowAudioBtn(true)
+                }
+                if (textTracks && textTracks.length > 0) {
+                    setShowSubtitleBtn(true)
+                }
+            }
             mediaRef.current = video
         }
     }, [nextFile])
@@ -101,16 +118,9 @@ const Player = ({ backHome, ...rest }) => {
         }
         onHideAudioList()
     }, [mediaRef, onHideAudioList])
-    const audioList = useCallback(() => {
-        if (mediaRef) {
-            /** @type {Array} */
-            const audioTracks = mediaRef.current.audioTracks
-            if (audioTracks && audioTracks.length) {
-                return (<AudioList audioTracks={audioTracks} onSelectAudio={onSelectAudio} />)
-            }
-        }
-        return (<p>{$L('No Audio found.')}</p>)
-    }, [mediaRef, onSelectAudio])
+    const audioList = useCallback(() => (
+        <AudioList audioTracks={mediaRef.current.audioTracks} onSelectAudio={onSelectAudio} />
+    ), [mediaRef, onSelectAudio])
 
     useEffect(() => { if (passNextFile) nextFile() }, [passNextFile, nextFile])
 
@@ -124,16 +134,20 @@ const Player = ({ backHome, ...rest }) => {
                 {file.type === 'video' &&
                     <MediaControls>
                         <rightComponents>
-                            <IconButton backgroundOpacity="translucent">sub</IconButton>
-                            <IconButtonWithPopup backgroundOpacity="translucent"
-                                open={showAudioList}
-                                onClick={onShowAudioList}
-                                popupComponent={audioList}
-                                onClose={onHideAudioList}
-                                direction="up"
-                                showCloseButton>
-                                audio
-                            </IconButtonWithPopup>
+                            {showSubtitleBtn &&
+                                <IconButton backgroundOpacity="translucent">sub</IconButton>
+                            }
+                            {showAudioBtn &&
+                                <IconButtonWithPopup backgroundOpacity="translucent"
+                                    open={showAudioList}
+                                    onClick={onShowAudioList}
+                                    popupComponent={audioList}
+                                    onClose={onHideAudioList}
+                                    direction="up"
+                                    showCloseButton>
+                                    audio
+                                </IconButtonWithPopup>
+                            }
                         </rightComponents>
                     </MediaControls>
                 }

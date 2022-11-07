@@ -16,10 +16,9 @@ import './attachErrorHandler'
 const RoutablePanels = Routable({ navigate: 'onBack' }, Panels)
 
 const App = ({ ...rest }) => {
+    /** @type {[String, Function]} */
     const [path, setPath] = useRecoilState(pathState)
-    const backHome = useCallback(() => {
-        setPath('/home')
-    }, [setPath])
+    const backHome = useCallback(() => { setPath('/home') }, [setPath])
 
     return (
         <RoutablePanels {...rest} path={path} noCloseButton>
