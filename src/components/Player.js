@@ -1,14 +1,17 @@
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import IconButton from '@enact/moonstone/IconButton'
+import ContextualPopupDecorator from '@enact/moonstone/ContextualPopupDecorator'
 import VideoPlayer, { MediaControls } from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
-import { I18nContextDecorator } from '@enact/i18n/I18nDecorator'
-import languages from '@cospired/i18n-iso-languages'
-import LocaleInfo from 'ilib/lib/LocaleInfo'
+import $L from '@enact/i18n/$L'
 import { useRecoilValue, useRecoilState } from 'recoil'
 import { fileIndexState, filesState } from '../recoilConfig'
 import silent from '../../assets/silent.ogg'
+import AudioList from './AudioList'
+
+
+const IconButtonWithPopup = ContextualPopupDecorator(IconButton)
 
 
 /**
@@ -17,14 +20,15 @@ import silent from '../../assets/silent.ogg'
  * @param {String} obj.locale
  * @param {Object} obj.rest
  */
-const Player = ({ backHome, locale, ...rest }) => {
-    const localeInfo = new LocaleInfo(locale).getLocale()
+const Player = ({ backHome, ...rest }) => {
     /** @type {[Number, Function]} */
     const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
     /** @type {Array<import('../models/File').default} */
     const files = useRecoilValue(filesState)
     /** @type {import('../models/Playable').default} */
     const file = files[fileIndex]
+    /** @type {[Boolean, Function]} */
+    const [showAudioList, setShowAudioList] = useState(false)
 
     const nextFile = useCallback(() => {
         if (fileIndex + 1 < files.length) {
@@ -48,8 +52,7 @@ const Player = ({ backHome, locale, ...rest }) => {
     }, [setFileIndex, fileIndex, backHome, files])
     let title = file.title, mimeType = file.mimeType, source = file.res.url
     let imageUrl = file.imageUrl, passNextFile = false
-    /** @type {HTMLVideoElement} */
-    let mediaRef = null
+    let mediaRef = useRef(null)
 
     if (file.type === 'music') {
         const audio = document.createElement('audio')
@@ -75,30 +78,41 @@ const Player = ({ backHome, locale, ...rest }) => {
         const video = document.createElement('video')
         passNextFile = !video.canPlayType(mimeType)
     }
-    useEffect(() => {
-        if (passNextFile) {
-            nextFile()
-        }
-    }, [passNextFile, nextFile])
 
-    const setMediaRef = node => {
+    const setMediaRef = useCallback(node => {
         if (node) {
-            mediaRef = document.querySelector('video')
-            mediaRef.onended = nextFile
+            const video = document.querySelector('video')
+            video.onended = nextFile
+            mediaRef.current = video
         }
-    }
+    }, [nextFile])
 
-    const handleClick = useCallback(() => {
+    const onShowAudioList = useCallback(() => { setShowAudioList(oldVar => !oldVar) }, [setShowAudioList])
+    const onHideAudioList = useCallback(() => { setShowAudioList(false) }, [setShowAudioList])
+    const onSelectAudio = useCallback(({ selected }) => {
+        if (mediaRef.current.audioTracks.length > 1) {
+            mediaRef.current.pause()
+            const currentTime = mediaRef.current.currentTime - 2
+            Array.from(mediaRef.current.audioTracks).forEach((audio, index) => {
+                audio.enabled = selected === index
+            })
+            mediaRef.current.currentTime = Math.max(0, currentTime)
+            mediaRef.current.play()
+        }
+        onHideAudioList()
+    }, [mediaRef, onHideAudioList])
+    const audioList = useCallback(() => {
         if (mediaRef) {
-            /** @param {Array} */
-            const audioTracks = mediaRef.audioTracks
-            if (audioTracks) {
-                for (const audio of audioTracks) {
-                    console.log(languages.getName(audio.language, localeInfo.language))
-                }
+            /** @type {Array} */
+            const audioTracks = mediaRef.current.audioTracks
+            if (audioTracks && audioTracks.length) {
+                return (<AudioList audioTracks={audioTracks} onSelectAudio={onSelectAudio} />)
             }
         }
-    }, [mediaRef, localeInfo])
+        return (<p>{$L('No Audio found.')}</p>)
+    }, [mediaRef, onSelectAudio])
+
+    useEffect(() => { if (passNextFile) nextFile() }, [passNextFile, nextFile])
 
     return (
         <div className={rest.className}>
@@ -107,15 +121,22 @@ const Player = ({ backHome, locale, ...rest }) => {
                 onJumpForward={nextFile}
                 ref={setMediaRef}>
                 <source src={source} type={mimeType} />
-                <MediaControls>
-                    <rightComponents>
-                        <IconButton backgroundOpacity="translucent">sub</IconButton>
-                        <IconButton backgroundOpacity="translucent"
-                            onClick={handleClick}>
-                            audio
-                        </IconButton>
-                    </rightComponents>
-                </MediaControls>
+                {file.type === 'video' &&
+                    <MediaControls>
+                        <rightComponents>
+                            <IconButton backgroundOpacity="translucent">sub</IconButton>
+                            <IconButtonWithPopup backgroundOpacity="translucent"
+                                open={showAudioList}
+                                onClick={onShowAudioList}
+                                popupComponent={audioList}
+                                onClose={onHideAudioList}
+                                direction="up"
+                                showCloseButton>
+                                audio
+                            </IconButtonWithPopup>
+                        </rightComponents>
+                    </MediaControls>
+                }
             </VideoPlayer>
         </div>
     )
@@ -123,7 +144,6 @@ const Player = ({ backHome, locale, ...rest }) => {
 
 Player.propTypes = {
     backHome: PropTypes.func,
-    locale: PropTypes.string
 }
 
-export default I18nContextDecorator({ localeProp: 'locale' }, Player)
+export default Player
