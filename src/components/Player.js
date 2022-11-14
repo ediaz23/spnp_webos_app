@@ -2,21 +2,100 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import IconButton from '@enact/moonstone/IconButton'
 import ContextualPopupDecorator from '@enact/moonstone/ContextualPopupDecorator'
-import VideoPlayer, { MediaControls } from '@enact/moonstone/VideoPlayer'
+import VideoPlayer, { MediaControls, Video } from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
 import { useRecoilValue, useRecoilState } from 'recoil'
 import { fileIndexState, filesState } from '../recoilConfig'
 import silent from '../../assets/silent.ogg'
-import AudioList from './AudioList'
-import toWebVTT from 'srt-webvtt'
+import AudioSelect from './AudioSelect'
+import { Buffer } from 'buffer'
+import MP4Box from 'mp4box'
 
-import sub from '../../assets/Kimi.no.na.wa.2016.1080p.1080p-dual-lat.srt'
-import video2 from '../../assets/video2.vtt'
-import video1_1 from '../../assets/video1_1.vtt'
+import AudioList from './AudioList'
 
 
 const IconButtonWithPopup = ContextualPopupDecorator(IconButton)
 
+
+const toBuffer = (ab) => {
+    const buffer = new Buffer(ab.byteLength)
+    const view = new Uint8Array(ab)
+    for (let i = 0; i < buffer.length; ++i) {
+        buffer[i] = view[i]
+    }
+    return buffer
+}
+
+/**
+ * @param {import('../models/Video').default} video
+ * @return {Promise<Array>}
+ */
+const extracMp4Subtitles = async (video) => {
+    const mp4boxfile = MP4Box.createFile()
+    const bufferSize = 1 << 23
+    const subtitles = [], control = []
+
+    let filePos = 0, loop = true
+
+    mp4boxfile.onReady = (info) => {
+        if (info.subtitleTracks) {
+            loop = info.subtitleTracks.length > 0
+            for (const track of info.subtitleTracks) {
+                track.cueList = []
+                track.addCue = function(cue) { this.cueList.push(cue) }
+                subtitles.push(track)
+                mp4boxfile.setExtractionOptions(track.id, track)
+            }
+            mp4boxfile.start()
+        } else {
+            loop = false
+        }
+    }
+
+    mp4boxfile.onSamples = async (id, textTrack, samples) => {
+        control.push(id)
+        loop = control.length < subtitles.length
+        for (const sample of samples) {
+            const text = toBuffer(sample.data).toString('utf-8').substring(2)
+            const cue = new window.VTTCue(sample.dts / sample.timescale, (sample.dts + sample.duration) / sample.timescale, text)
+            textTrack.addCue(cue)
+        }
+    }
+    const resSize = await fetch(video.res.url, { method: 'HEAD' })
+    const maxSize = parseInt(resSize.headers.get('Content-Length'))
+    while (loop) {  // up function are executed inside loop
+        try {
+            const nextChunk = Math.min(filePos + bufferSize, maxSize)
+            const res = await fetch(video.res.url, { headers: { Range: `bytes=${filePos}-${nextChunk}` } })
+            if ([200, 206].includes(res.status)) {
+                const arrayBuffer = await res.arrayBuffer()
+                arrayBuffer.fileStart = filePos
+                filePos += arrayBuffer.byteLength
+                mp4boxfile.appendBuffer(arrayBuffer)
+            } else {
+                loop = false
+            }
+        } catch (err) {
+            console.log(err)
+            loop = false
+        }
+    }
+    return subtitles
+}
+
+/**
+ * @param {import('../models/Video').default} video
+ * @return {Promise<Array>}
+ */
+const extractSubtitles = async (video) => {
+    let out = []
+    if (video.mimeType === 'video/mp4') {
+        out = await extracMp4Subtitles(video)
+    } else {
+        /** @todo que pasa si no es mp4 */
+    }
+    return out
+}
 
 const buildData = file => {
     let title = file.title, mimeType = file.mimeType, source = file.res.url
@@ -45,11 +124,6 @@ const buildData = file => {
     } else if (file.type === 'video') {
         const video = document.createElement('video')
         passNextFile = !video.canPlayType(mimeType)
-        /* leer parte de una url
-        fetch(file.res.url, { headers: { Range: 'bytes=0-253' }, mode: 'no-cors' })
-        .then(res => console.log('si funcionó '))
-        .catch(() => console.log('dio error'))
-        */
     }
     return { title, mimeType, source, imageUrl, passNextFile }
 }
@@ -68,23 +142,30 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {import('../models/Playable').default} */
     const file = files[fileIndex]
     /** @type {[Boolean, Function]} */
-    const [showAudioList, setShowAudioList] = useState(false)
-    /** @type {[Boolean, Function]} */
-    const [showAudioBtn, setShowAudioBtn] = useState(false)
+    const [showSubtitleList, setShowSubtitleList] = useState(false)
     /** @type {[Boolean, Function]} */
     const [showSubtitleBtn, setShowSubtitleBtn] = useState(false)
     /** @type {[Boolean, Function]} */
     const [playNext, setPlayNext] = useState(false)
+    /** @type {[Boolean, Function]} */
+    const [loading, setLoading] = useState(file.type === 'video')
+    /** @type {{current: HTMLVideoElement}} */
     const mediaRef = useRef(null)
     const fileData = buildData(file)
+    const [subtitles, setSubtitles] = useState(null)
+
+    const setFileIndexCb = useCallback(index => {
+        setShowSubtitleBtn(false)
+        setFileIndex(index)
+    }, [setShowSubtitleBtn, setFileIndex])
 
     const nextFile = useCallback(() => {
         if (fileIndex + 1 < files.length) {
-            setFileIndex(fileIndex + 1)
+            setFileIndexCb(fileIndex + 1)
         } else {
             backHome()
         }
-    }, [setFileIndex, fileIndex, backHome, files.length])
+    }, [setFileIndexCb, fileIndex, backHome, files.length])
 
     const prevFile = useCallback(() => {
         if (fileIndex - 1 >= 0) {
@@ -92,79 +173,75 @@ const Player = ({ backHome, ...rest }) => {
             if (newFile.type === 'folder') {
                 backHome()
             } else {
-                setFileIndex(fileIndex - 1)
+                setFileIndexCb(fileIndex - 1)
             }
         } else {
             backHome()
         }
-    }, [setFileIndex, fileIndex, backHome, files])
+    }, [setFileIndexCb, fileIndex, backHome, files])
+
+    const setMediaRef = useCallback(node => { if (node) mediaRef.current = document.querySelector('video') }, [])
+    const onEnded = useCallback(() => { if (playNext) nextFile() }, [nextFile, playNext])
+    const togglePlayNext = useCallback(() => { setPlayNext(oldVar => !oldVar) }, [setPlayNext])
 
 
-    /**
-     * @todo falta los subitulos.
-     */
-    const setMediaRef = useCallback(node => {
-        if (node) {
-            const video = document.querySelector('video')
-            video.onloadedmetadata = () => {
-                /** @type {{audioTracks: Array, textTracks: Array}} */
-                const { audioTracks, textTracks } = video
-                if (audioTracks && audioTracks.length > 1) {
-                    setShowAudioBtn(true)
-                }
-                if (textTracks && textTracks.length > 0) {
-                    setShowSubtitleBtn(true)
-                }
-                /*
-                fetch(sub).then(async res => {
-                    const subFile = await res.blob()
-                    const textTrackUrl = await toWebVTT(subFile)
-                    const track = video.addTextTrack('subtitles', 'English', 'en')
-                    track.src = textTrackUrl
-                    setShowSubtitleBtn(true)
-                })
-                fetch(video2).then(async res => {
-                    const subFile = await res.blob()
-                    const track = video.addTextTrack('subtitles', 'Portu', 'pt')
-                    track.src = subFile
-                    track.mode = 'showing'
-                })*/
-            }
+    // subtitle
+    const onShowSubList = useCallback(() => { setShowSubtitleList(oldVar => !oldVar) }, [setShowSubtitleList])
+    const onHideSubList = useCallback(() => { setShowSubtitleList(false) }, [setShowSubtitleList])
+    const onSelectSub = useCallback(({ selected }) => {
+        mediaRef.current.pause()
+        const currentTime = mediaRef.current.currentTime - 2
+        Array.from(mediaRef.current.textTracks).forEach(sub => { sub.mode = 'hidden' })
+        mediaRef.current.textTracks[selected].mode = 'showing'
+        mediaRef.current.currentTime = Math.max(0, currentTime)
+        mediaRef.current.play()
+        onHideSubList()
+    }, [mediaRef, onHideSubList])
+    const subList = useCallback(() => (
+        <AudioList audioTracks={mediaRef.current.textTracks} onSelectAudio={onSelectSub} />
+    ), [mediaRef, onSelectSub])
+
+    useEffect(() => {
+        const video = document.querySelector('video')
+        if (video) {
             mediaRef.current = video
         }
-    }, [])
-    const onEnded = useCallback(() => { if (playNext) nextFile() }, [nextFile, playNext])
-
-    const togglePlayNext = useCallback(() => { setPlayNext(oldVar => !oldVar) }, [setPlayNext])
-    const onShowAudioList = useCallback(() => { setShowAudioList(oldVar => !oldVar) }, [setShowAudioList])
-    const onHideAudioList = useCallback(() => { setShowAudioList(false) }, [setShowAudioList])
-    const onSelectAudio = useCallback(({ selected }) => {
-        if (mediaRef.current.audioTracks.length > 1) {
-            mediaRef.current.pause()
-            const currentTime = mediaRef.current.currentTime - 2
-            Array.from(mediaRef.current.audioTracks).forEach((audio, index) => {
-                audio.enabled = selected === index
-            })
-            mediaRef.current.currentTime = Math.max(0, currentTime)
-            mediaRef.current.play()
+        if (file.type === 'video') {
+            extractSubtitles(file).then(setSubtitles)
         }
-        onHideAudioList()
-    }, [mediaRef, onHideAudioList])
-    const audioList = useCallback(() => (
-        <AudioList audioTracks={mediaRef.current.audioTracks} onSelectAudio={onSelectAudio} />
-    ), [mediaRef, onSelectAudio])
+    }, [file])
+    useEffect(() => {
+        if (mediaRef.current) {
+            const video = mediaRef.current
+            if (subtitles) {
+                for (const sub of subtitles) {
+                    const track = video.addTextTrack(sub.type, sub.name, sub.language)
+                    for (const cue of sub.cueList) {
+                        track.addCue(cue)
+                    }
+                }
+            }
+            if (video.textTracks && video.textTracks.length > 0) {
+                setShowSubtitleBtn(true)
+            }
+            if (subtitles) {
+                setLoading(false)
+            }
+        }
 
+    }, [mediaRef, subtitles])
     useEffect(() => { if (fileData.passNextFile) nextFile() }, [fileData.passNextFile, nextFile, playNext])
-
     return (
         <div className={rest.className}>
             <VideoPlayer title={fileData.title} poster={fileData.imageUrl} {...rest}
                 onJumpBackward={prevFile}
                 onJumpForward={nextFile}
                 onEnded={onEnded}
-                subtitle={'asdf'}
+                loading={loading}
                 ref={setMediaRef}>
-                <source src={fileData.source} type={fileData.mimeType} />
+                <Video id={file.id}>
+                    <source src={fileData.source} type={fileData.mimeType} />
+                </Video>
                 <MediaControls>
                     <rightComponents>
                         <IconButton backgroundOpacity="lightTranslucent"
@@ -173,22 +250,22 @@ const Player = ({ backHome, ...rest }) => {
                             arrowhookright
                         </IconButton>
                         {file.type === 'video' && showSubtitleBtn &&
-                            <IconButton backgroundOpacity="translucent">sub</IconButton>
-                        }
-                        {file.type === 'video' && showAudioBtn &&
                             <IconButtonWithPopup backgroundOpacity="translucent"
-                                open={showAudioList}
-                                onClick={onShowAudioList}
-                                popupComponent={audioList}
-                                onClose={onHideAudioList}
+                                open={showSubtitleList}
+                                onClick={onShowSubList}
+                                onClose={onHideSubList}
+                                popupComponent={subList}
                                 direction="up"
                                 showCloseButton>
-                                audio
+                                sub
                             </IconButtonWithPopup>
+                        }
+                        {file.type === 'video' && mediaRef.current &&
+                            mediaRef.current.audioTracks && mediaRef.current.audioTracks.length > 1 &&
+                            <AudioSelect file={file} />
                         }
                     </rightComponents>
                 </MediaControls>
-
             </VideoPlayer>
         </div>
     )
