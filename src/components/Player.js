@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import IconButton from '@enact/moonstone/IconButton'
 import ContextualPopupDecorator from '@enact/moonstone/ContextualPopupDecorator'
 import VideoPlayer, { MediaControls, Video } from '@enact/moonstone/VideoPlayer'
@@ -140,6 +140,8 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {Array<import('../models/File').default} */
     const files = useRecoilValue(filesState)
     /** @type {import('../models/Playable').default} */
+    const filesReverse = useMemo(() => [...files].reverse(), [files])
+    /** @type {import('../models/Playable').default} */
     const file = files[fileIndex]
     /** @type {[Boolean, Function]} */
     const [showSubtitleList, setShowSubtitleList] = useState(false)
@@ -151,39 +153,66 @@ const Player = ({ backHome, ...rest }) => {
     const [loading, setLoading] = useState(file.type === 'video')
     /** @type {{current: HTMLVideoElement}} */
     const mediaRef = useRef(null)
-    const fileData = buildData(file)
+    /** @type {[String, Function]} */
+    const [repeat, setRepeat] = useState('none')
+    const fileData = useMemo(() => buildData(file), [file])
     const [subtitles, setSubtitles] = useState(null)
+    const repeatSet = useMemo(() => { return { none: 'all', all: 'one', one: 'none' } }, [])
 
     const setFileIndexCb = useCallback(index => {
         setShowSubtitleBtn(false)
         setFileIndex(index)
     }, [setShowSubtitleBtn, setFileIndex])
 
-    const nextFile = useCallback(() => {
-        if (fileIndex + 1 < files.length) {
-            setFileIndexCb(fileIndex + 1)
-        } else {
-            backHome()
+    const playNextFile = useCallback(({ prev }) => {
+        const audio = document.createElement('audio')
+        const video = document.createElement('video')
+        /** @type {Array<import('../models/File').default} */
+        const array = prev ? filesReverse : files
+        /** @param {import('../models/File').default} f */
+        const validFile = f => f.type !== 'folder' &&
+            (f.type === 'image' ||
+                (f.type === 'music' && audio.canPlayType(f.mimeType)) ||
+                (f.type === 'video' && video.canPlayType(f.mimeType)))
+        const complementIndex = index => prev ? array.length - index - 1 : index
+        const fileIndexComplement = complementIndex(fileIndex)
+        let nextIndex = fileIndexComplement + 1
+        while (nextIndex < array.length && !validFile(array[nextIndex])) {
+            ++nextIndex
         }
-    }, [setFileIndexCb, fileIndex, backHome, files.length])
-
-    const prevFile = useCallback(() => {
-        if (fileIndex - 1 >= 0) {
-            const newFile = files[fileIndex - 1]
-            if (newFile.type === 'folder') {
-                backHome()
+        if (nextIndex < array.length) {
+            setFileIndexCb(complementIndex(nextIndex))
+        } else {
+            if (repeat === 'all') {
+                nextIndex = 0
+                while (nextIndex < fileIndexComplement && !validFile(array[nextIndex])) {
+                    ++nextIndex
+                }
+                if (nextIndex < fileIndexComplement) {
+                    setFileIndexCb(complementIndex(nextIndex))
+                } else {
+                    backHome()
+                }
             } else {
-                setFileIndexCb(fileIndex - 1)
+                backHome()
             }
-        } else {
-            backHome()
         }
-    }, [setFileIndexCb, fileIndex, backHome, files])
+    }, [backHome, fileIndex, files, filesReverse, repeat, setFileIndexCb])
 
-    const setMediaRef = useCallback(node => { if (node) mediaRef.current = document.querySelector('video') }, [])
-    const onEnded = useCallback(() => { if (playNext) nextFile() }, [nextFile, playNext])
+    const nextFile = useCallback(() => { playNextFile({ next: true }) }, [playNextFile])
+    const prevFile = useCallback(() => { playNextFile({ prev: true }) }, [playNextFile])
     const togglePlayNext = useCallback(() => { setPlayNext(oldVar => !oldVar) }, [setPlayNext])
-
+    const changeRepeat = useCallback(() => { setRepeat(oldVar => repeatSet[oldVar]) }, [setRepeat, repeatSet])
+    const setMediaRef = useCallback(node => { if (node) mediaRef.current = document.querySelector('video') }, [])
+    const onEnded = useCallback(() => {
+        if (repeat === 'one') {
+            mediaRef.current.play()
+        } else {
+            if (playNext) {
+                nextFile()
+            }
+        }
+    }, [nextFile, playNext, repeat])
 
     // subtitle
     const onShowSubList = useCallback(() => { setShowSubtitleList(oldVar => !oldVar) }, [setShowSubtitleList])
@@ -243,6 +272,13 @@ const Player = ({ backHome, ...rest }) => {
                     <source src={fileData.source} type={fileData.mimeType} />
                 </Video>
                 <MediaControls>
+                    <leftComponents>
+                        <IconButton backgroundOpacity="lightTranslucent"
+                            selected={repeat !== 'none'}
+                            onClick={changeRepeat}>
+                            {'repeat' + repeat}
+                        </IconButton>
+                    </leftComponents>
                     <rightComponents>
                         <IconButton backgroundOpacity="lightTranslucent"
                             selected={playNext}
