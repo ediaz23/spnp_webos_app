@@ -6,9 +6,7 @@ import AudioList from './AudioList'
 
 const IconButtonWithPopup = ContextualPopupDecorator(IconButton)
 
-
 const AudioSelect = () => {
-    console.log('AudioSelect')
     const video = document.querySelector('video')
 
     /** @type {[Boolean, Function]} */
@@ -33,7 +31,8 @@ const AudioSelect = () => {
     ), [video, onSelectAudio])
 
     return (
-        <IconButtonWithPopup backgroundOpacity="translucent"
+        <IconButtonWithPopup
+            backgroundOpacity="translucent"
             open={showAudioList}
             onClick={onShowAudioList}
             onClose={onHideAudioList}

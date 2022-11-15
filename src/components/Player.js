@@ -8,6 +8,7 @@ import { useRecoilValue, useRecoilState } from 'recoil'
 import { fileIndexState, filesState } from '../recoilConfig'
 import silent from '../../assets/silent.ogg'
 import AudioSelect from './AudioSelect'
+import FileTypeSelect from './FileTypeSelect'
 import { Buffer } from 'buffer'
 import MP4Box from 'mp4box'
 
@@ -27,6 +28,7 @@ const toBuffer = (ab) => {
 }
 
 /**
+ * Extrac subtitles from mp4 file
  * @param {import('../models/Video').default} video
  * @return {Promise<Array>}
  */
@@ -63,7 +65,7 @@ const extracMp4Subtitles = async (video) => {
     }
     const resSize = await fetch(video.res.url, { method: 'HEAD' })
     const maxSize = parseInt(resSize.headers.get('Content-Length'))
-    while (loop) {  // up function are executed inside loop
+    while (loop) {  // up function are executed inside loop mp4boxfile.onReady mp4boxfile.onSamples
         try {
             const nextChunk = Math.min(filePos + bufferSize, maxSize)
             const res = await fetch(video.res.url, { headers: { Range: `bytes=${filePos}-${nextChunk}` } })
@@ -97,13 +99,16 @@ const extractSubtitles = async (video) => {
     return out
 }
 
+/**
+ * Get metadat from file to pass to player
+ * @param {import('../models/File').default} file
+ * @returns {Object}
+ */
 const buildData = file => {
     let title = file.title, mimeType = file.mimeType, source = file.res.url
-    let imageUrl = file.imageUrl, passNextFile = false
+    let imageUrl = file.imageUrl
 
     if (file.type === 'music') {
-        const audio = document.createElement('audio')
-        passNextFile = !audio.canPlayType(mimeType)
         /** @type {import('../models/Music').default} */
         const music = file
         const tmp = []
@@ -121,11 +126,59 @@ const buildData = file => {
         mimeType = 'audio/ogg'
         source = silent
         imageUrl = file.res.url
-    } else if (file.type === 'video') {
-        const video = document.createElement('video')
-        passNextFile = !video.canPlayType(mimeType)
     }
-    return { title, mimeType, source, imageUrl, passNextFile }
+    return { title, mimeType, source, imageUrl }
+}
+
+/**
+ * Calculate next file to play, no matters if it is next o prev file
+ */
+const playNextFileFn = ({ backHome, fileIndex, files, filesReverse, repeat, setFileIndexCb, typeSelected, prev }) => {
+    const audio = document.createElement('audio')
+    const video = document.createElement('video')
+    const validAudio = f => f.type === 'music' && audio.canPlayType(f.mimeType)
+    const validImage = f => f.type === 'image'
+    const validVideo = f => f.type === 'video' && video.canPlayType(f.mimeType)
+    /** @param {import('../models/File').default} f */
+    const validFile = f => {
+        let out = false
+        if (f.type !== 'folder') {
+            out = (
+                (typeSelected === 'all' && (validImage(f) || validAudio(f) || validVideo(f))) ||
+                (typeSelected === 'image' && validImage(f)) ||
+                (typeSelected === 'music' && validAudio(f)) ||
+                (typeSelected === 'video' && validVideo(f)) ||
+                (typeSelected === 'music_video' && (validAudio(f) || validVideo(f)))
+            )
+        }
+        return out
+    }
+    /** @type {Array<import('../models/File').default} */
+    const array = prev ? filesReverse : files
+    /** Calculate complement index of index for array */
+    const complementIndex = (index) => prev ? array.length - index - 1 : index
+    const fileIndexComplement = complementIndex(fileIndex)
+    let nextIndex = fileIndexComplement + 1
+    while (nextIndex < array.length && !validFile(array[nextIndex])) {
+        ++nextIndex
+    }
+    if (nextIndex < array.length) {
+        setFileIndexCb(complementIndex(nextIndex))
+    } else {
+        if (repeat === 'all') {
+            nextIndex = 0
+            while (nextIndex < fileIndexComplement && !validFile(array[nextIndex])) {
+                ++nextIndex
+            }
+            if (nextIndex < fileIndexComplement) {
+                setFileIndexCb(complementIndex(nextIndex))
+            } else {
+                backHome()
+            }
+        } else {
+            backHome()
+        }
+    }
 }
 
 /**
@@ -156,48 +209,20 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {[String, Function]} */
     const [repeat, setRepeat] = useState('none')
     const fileData = useMemo(() => buildData(file), [file])
+    /** @type {[Array, Function]} */
     const [subtitles, setSubtitles] = useState(null)
     const repeatSet = useMemo(() => { return { none: 'all', all: 'one', one: 'none' } }, [])
+    /** @type {[String, Function]} */
+    const [typeSelected, setTypeSelected] = useState('all')
 
     const setFileIndexCb = useCallback(index => {
         setShowSubtitleBtn(false)
         setFileIndex(index)
     }, [setShowSubtitleBtn, setFileIndex])
 
-    const playNextFile = useCallback(({ prev }) => {
-        const audio = document.createElement('audio')
-        const video = document.createElement('video')
-        /** @type {Array<import('../models/File').default} */
-        const array = prev ? filesReverse : files
-        /** @param {import('../models/File').default} f */
-        const validFile = f => f.type !== 'folder' &&
-            (f.type === 'image' ||
-                (f.type === 'music' && audio.canPlayType(f.mimeType)) ||
-                (f.type === 'video' && video.canPlayType(f.mimeType)))
-        const complementIndex = index => prev ? array.length - index - 1 : index
-        const fileIndexComplement = complementIndex(fileIndex)
-        let nextIndex = fileIndexComplement + 1
-        while (nextIndex < array.length && !validFile(array[nextIndex])) {
-            ++nextIndex
-        }
-        if (nextIndex < array.length) {
-            setFileIndexCb(complementIndex(nextIndex))
-        } else {
-            if (repeat === 'all') {
-                nextIndex = 0
-                while (nextIndex < fileIndexComplement && !validFile(array[nextIndex])) {
-                    ++nextIndex
-                }
-                if (nextIndex < fileIndexComplement) {
-                    setFileIndexCb(complementIndex(nextIndex))
-                } else {
-                    backHome()
-                }
-            } else {
-                backHome()
-            }
-        }
-    }, [backHome, fileIndex, files, filesReverse, repeat, setFileIndexCb])
+    const playNextFile = useCallback(param => {
+        playNextFileFn({ backHome, fileIndex, files, filesReverse, repeat, setFileIndexCb, typeSelected, ...param })
+    }, [backHome, fileIndex, files, filesReverse, repeat, setFileIndexCb, typeSelected])
 
     const nextFile = useCallback(() => { playNextFile({ next: true }) }, [playNextFile])
     const prevFile = useCallback(() => { playNextFile({ prev: true }) }, [playNextFile])
@@ -259,7 +284,7 @@ const Player = ({ backHome, ...rest }) => {
         }
 
     }, [mediaRef, subtitles])
-    useEffect(() => { if (fileData.passNextFile) nextFile() }, [fileData.passNextFile, nextFile, playNext])
+
     return (
         <div className={rest.className}>
             <VideoPlayer title={fileData.title} poster={fileData.imageUrl} {...rest}
@@ -273,6 +298,7 @@ const Player = ({ backHome, ...rest }) => {
                 </Video>
                 <MediaControls>
                     <leftComponents>
+                        <FileTypeSelect typeSelected={typeSelected} onSelect={setTypeSelected} />
                         <IconButton backgroundOpacity="lightTranslucent"
                             selected={repeat !== 'none'}
                             onClick={changeRepeat}>

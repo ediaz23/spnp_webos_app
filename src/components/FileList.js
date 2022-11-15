@@ -7,6 +7,7 @@ import { useSetRecoilState, useRecoilState } from 'recoil'
 import { pathState, fileIndexState } from '../recoilConfig'
 import useSetFilePath from '../hooks/setFilePath'
 import back from '../back'
+import $L from '@enact/i18n/$L'
 import FileListItem from './FileListItem'
 
 
@@ -14,9 +15,10 @@ import FileListItem from './FileListItem'
  * @param {Object} obj
  * @param {String} obj.id
  * @param {Array<import('../models/File').default>} obj.files
+ * @param {Array<import('../models/File').default>} obj.showMessage
  * @param {Object} obj.rest
  */
-const FileList = ({ id, files, ...rest }) => {
+const FileList = ({ id, files, showMessage, ...rest }) => {
     const scrollToRef = useRef(null)
     /** @type {Function} */
     const setPath = useSetRecoilState(pathState)
@@ -31,9 +33,19 @@ const FileList = ({ id, files, ...rest }) => {
         /** @type {import('../models/File').default} */
         const file = files[index]
         if (file.type !== 'folder') {
-            setFileIndex(index)
-            setPath('/player')
-            back.pushHistory({ doBack: () => setPath('/home') })
+            let canPlay = true
+            if (file.type === 'video') {
+                canPlay = document.createElement('video').canPlayType(file.mimeType)
+            } else if (file.type === 'music') {
+                canPlay = document.createElement('audio').canPlayType(file.mimeType)
+            }
+            if (canPlay) {
+                setFileIndex(index)
+                setPath('/player')
+                back.pushHistory({ doBack: () => setPath('/home') })
+            } else {
+                showMessage($L('Cannot play this file') + ` ${file.title} ${file.mimeType}`)
+            }
         } else {
             setFilePath(oldList => {
                 if (oldList.length) {
@@ -45,7 +57,7 @@ const FileList = ({ id, files, ...rest }) => {
             })
             setFileIndex(0)
         }
-    }, [files, setFileIndex, setPath, setFilePath])
+    }, [files, setFileIndex, setPath, setFilePath, showMessage])
 
     const renderItem = useCallback(({ index, ...restProps }) => (
         <FileListItem key={index} selectItem={selectItem}
@@ -72,6 +84,7 @@ const FileList = ({ id, files, ...rest }) => {
 FileList.propTypes = {
     id: PropTypes.string,
     files: PropTypes.array,
+    showMessage: PropTypes.func.isRequired,
 }
 
 export default FileList

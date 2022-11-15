@@ -7,5 +7,11 @@
     "Search": "Buscar",
     "No file was found.": "No se encontraron archivos.",
     "Error searching files.": "Error buscando archivos.",
-    "Loading...": "Cargando..."
+    "Loading...": "Cargando...",
+    "Cannot play this file": "No se puede reproducir este archivo",
+    "All": "Todo",
+    "Music": "Musica",
+    "Image": "Imagen",
+    "Video": "Video",
+    "Music and Video": "Musica y Video"
 }

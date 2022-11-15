@@ -162,7 +162,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
                             }
                             {!isLoading && files !== null && files.length > 0 &&
                                 <FileList id={spotlightId} files={files}
-                                    index={rest['data-index']} />
+                                    index={rest['data-index']} showMessage={setMessage} />
                             }
                         </Cell>
                     </Column>
