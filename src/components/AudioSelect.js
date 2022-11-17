@@ -32,7 +32,7 @@ const AudioSelect = () => {
 
     return (
         <IconButtonWithPopup
-            backgroundOpacity="translucent"
+            backgroundOpacity="lightTranslucent"
             open={showAudioList}
             onClick={onShowAudioList}
             onClose={onHideAudioList}

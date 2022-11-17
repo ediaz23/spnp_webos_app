@@ -1,7 +1,6 @@
 
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import IconButton from '@enact/moonstone/IconButton'
-import ContextualPopupDecorator from '@enact/moonstone/ContextualPopupDecorator'
 import VideoPlayer, { MediaControls, Video } from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
 import { useRecoilValue, useRecoilState } from 'recoil'
@@ -9,13 +8,9 @@ import { fileIndexState, filesState } from '../recoilConfig'
 import silent from '../../assets/silent.ogg'
 import AudioSelect from './AudioSelect'
 import FileTypeSelect from './FileTypeSelect'
+import SubtitleSelect from './SubtitleSelect'
 import { Buffer } from 'buffer'
 import MP4Box from 'mp4box'
-
-import AudioList from './AudioList'
-
-
-const IconButtonWithPopup = ContextualPopupDecorator(IconButton)
 
 
 const toBuffer = (ab) => {
@@ -197,8 +192,6 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {import('../models/Playable').default} */
     const file = files[fileIndex]
     /** @type {[Boolean, Function]} */
-    const [showSubtitleList, setShowSubtitleList] = useState(false)
-    /** @type {[Boolean, Function]} */
     const [showSubtitleBtn, setShowSubtitleBtn] = useState(false)
     /** @type {[Boolean, Function]} */
     const [playNext, setPlayNext] = useState(false)
@@ -239,9 +232,7 @@ const Player = ({ backHome, ...rest }) => {
         }
     }, [nextFile, playNext, repeat])
 
-    // subtitle
-    const onShowSubList = useCallback(() => { setShowSubtitleList(oldVar => !oldVar) }, [setShowSubtitleList])
-    const onHideSubList = useCallback(() => { setShowSubtitleList(false) }, [setShowSubtitleList])
+    /*
     const onSelectSub = useCallback(({ selected }) => {
         mediaRef.current.pause()
         const currentTime = mediaRef.current.currentTime - 2
@@ -254,6 +245,7 @@ const Player = ({ backHome, ...rest }) => {
     const subList = useCallback(() => (
         <AudioList audioTracks={mediaRef.current.textTracks} onSelectAudio={onSelectSub} />
     ), [mediaRef, onSelectSub])
+    */
 
     useEffect(() => {
         const video = document.querySelector('video')
@@ -268,6 +260,7 @@ const Player = ({ backHome, ...rest }) => {
         if (mediaRef.current) {
             const video = mediaRef.current
             if (subtitles) {
+                console.log(subtitles)
                 for (const sub of subtitles) {
                     const track = video.addTextTrack(sub.type, sub.name, sub.language)
                     for (const cue of sub.cueList) {
@@ -311,19 +304,10 @@ const Player = ({ backHome, ...rest }) => {
                             onClick={togglePlayNext}>
                             arrowhookright
                         </IconButton>
-                        {file.type === 'video' && showSubtitleBtn &&
-                            <IconButtonWithPopup backgroundOpacity="translucent"
-                                open={showSubtitleList}
-                                onClick={onShowSubList}
-                                onClose={onHideSubList}
-                                popupComponent={subList}
-                                direction="up"
-                                showCloseButton>
-                                sub
-                            </IconButtonWithPopup>
+                        {showSubtitleBtn &&
+                            <SubtitleSelect />
                         }
-                        {file.type === 'video' && mediaRef.current &&
-                            mediaRef.current.audioTracks && mediaRef.current.audioTracks.length > 1 &&
+                        {mediaRef.current && mediaRef.current.audioTracks && mediaRef.current.audioTracks.length > 1 &&
                             <AudioSelect file={file} />
                         }
                     </rightComponents>

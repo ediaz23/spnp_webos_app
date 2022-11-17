@@ -42,7 +42,7 @@ const FileTypeSelect = ({ typeSelected, onSelect, ...rest }) => {
 
     return (
         <IconButtonWithPopup
-            backgroundOpacity="translucent"
+            backgroundOpacity="lightTranslucent"
             open={showList}
             onClick={onShowList}
             onClose={onHideList}
