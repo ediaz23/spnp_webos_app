@@ -16,13 +16,14 @@ const AudioSelect = () => {
     const onHideAudioList = useCallback(() => { setShowAudioList(false) }, [setShowAudioList])
     const onSelectAudio = useCallback(({ selected }) => {
         if (video.audioTracks.length > 1) {
-            video.pause()
+            let play = !video.paused
+            if (play) { video.pause() }
             const currentTime = video.currentTime - 2
             Array.from(video.audioTracks).forEach((audio, index) => {
                 audio.enabled = selected === index
             })
             video.currentTime = Math.max(0, currentTime)
-            video.play()
+            if (play) { video.play() }
         }
         onHideAudioList()
     }, [video, onHideAudioList])

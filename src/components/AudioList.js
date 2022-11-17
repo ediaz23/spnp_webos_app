@@ -5,6 +5,7 @@ import languages from '@cospired/i18n-iso-languages'
 import LocaleInfo from 'ilib/lib/LocaleInfo'
 import PropTypes from 'prop-types'
 import { I18nContextDecorator } from '@enact/i18n/I18nDecorator'
+import $L from '@enact/i18n/$L'
 
 
 const AudioList = ({ audioTracks, locale, onSelectAudio, ...rest }) => {
@@ -15,7 +16,7 @@ const AudioList = ({ audioTracks, locale, onSelectAudio, ...rest }) => {
         if (audio.enabled) {
             selectedAudio = index
         }
-        return languages.getName(audio.language, localeInfo.language)
+        return languages.getName(audio.language, localeInfo.language) || ((audio.language || $L('Noname')) + ' ' + index)
     })
 
     return (

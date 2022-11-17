@@ -11,6 +11,7 @@ import FileTypeSelect from './FileTypeSelect'
 import SubtitleSelect from './SubtitleSelect'
 import { Buffer } from 'buffer'
 import MP4Box from 'mp4box'
+import css from './SubtitleSelect.module.less'
 
 
 const toBuffer = (ab) => {
@@ -194,7 +195,7 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {[Boolean, Function]} */
     const [showSubtitleBtn, setShowSubtitleBtn] = useState(false)
     /** @type {[Boolean, Function]} */
-    const [playNext, setPlayNext] = useState(false)
+    const [playNext, setPlayNext] = useState(true)
     /** @type {[Boolean, Function]} */
     const [loading, setLoading] = useState(file.type === 'video')
     /** @type {{current: HTMLVideoElement}} */
@@ -251,6 +252,9 @@ const Player = ({ backHome, ...rest }) => {
         const video = document.querySelector('video')
         if (video) {
             mediaRef.current = video
+            if (!video.classList.contains(css.video)) {
+                video.classList.add(css.video)
+            }
         }
         if (file.type === 'video') {
             extractSubtitles(file).then(setSubtitles)
@@ -260,7 +264,6 @@ const Player = ({ backHome, ...rest }) => {
         if (mediaRef.current) {
             const video = mediaRef.current
             if (subtitles) {
-                console.log(subtitles)
                 for (const sub of subtitles) {
                     const track = video.addTextTrack(sub.type, sub.name, sub.language)
                     for (const cue of sub.cueList) {
@@ -305,7 +308,7 @@ const Player = ({ backHome, ...rest }) => {
                             arrowhookright
                         </IconButton>
                         {showSubtitleBtn &&
-                            <SubtitleSelect />
+                            <SubtitleSelect file={file} />
                         }
                         {mediaRef.current && mediaRef.current.audioTracks && mediaRef.current.audioTracks.length > 1 &&
                             <AudioSelect file={file} />

@@ -51,3 +51,12 @@ export const imageSettingState = atom({
         }
     }
 })
+
+export const subtitleConfigState = atom({
+    key: 'subtitleConfigState',
+    default: {
+        colorIndex: 0,
+        sizeIndex: 2,
+        positionIndex: 4,
+    }
+})

@@ -20,7 +20,8 @@
         "start": "ares-launch com.spnp.webos.player",
         "start-1": "ares-launch -d tv1 com.spnp.webos.player",
         "play": "npm run build && npm run install-tv && npm run start",
-        "play-1": "npm run build && npm run install-tv-1 && npm run start-1"
+        "play-1": "npm run build && npm run install-tv-1 && npm run start-1",
+        "play-p": "npm run build-p && npm run install-tv-1 && npm run start-1"
     },
     "author": "Esteban Díaz <esteban.diazt23@gmail.com>",
     "license": "Apache-2.0",
@@ -29,6 +30,7 @@
     "engines": {
         "npm": ">=6.9.0"
     },
+    "keywords": [ "dnla", "upnp", "ssdp", "webos", "player", "react", "enact", "moonstone"],
     "enact": {
         "theme": "moonstone"
     },

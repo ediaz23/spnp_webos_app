@@ -13,5 +13,21 @@
     "Music": "Musica",
     "Image": "Imagen",
     "Video": "Video",
-    "Music and Video": "Musica y Video"
+    "Music and Video": "Musica y Video",
+    "Very Small": "Muy pequeño",
+    "Small": "Pequeño",
+    "Normal": "Normal",
+    "Big": "Grande",
+    "White": "Blanco",
+    "Gray": "Gris",
+    "Yellow": "Amarillo",
+    "Green": "Verde",
+    "Blue": "Azul",
+    "Red": "Rojo",
+    "Noname": "Sin Nombre",
+    "Subtitle": "Subtitulo",
+    "Language": "Idioma",
+    "Position": "Posición",
+    "Size": "Tamaño",
+    "Color": "Color"
 }
