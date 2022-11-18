@@ -29,8 +29,7 @@ const App = ({ ...rest }) => {
     )
 }
 
-
-export default MoonstoneDecorator(I18nDecorator({
+const AppLocal = I18nDecorator({
     resources: [{
         resource: options => new Promise(res => {
             const localeInfo = new LocaleInfo(options.locale).getLocale()
@@ -39,4 +38,8 @@ export default MoonstoneDecorator(I18nDecorator({
         }),
         onLoad: res => languages.registerLocale(res)
     }]
-}, App))
+}, App)
+
+const AppTheme = MoonstoneDecorator(AppLocal)
+
+export default AppTheme

@@ -30,7 +30,16 @@
     "engines": {
         "npm": ">=6.9.0"
     },
-    "keywords": [ "dnla", "upnp", "ssdp", "webos", "player", "react", "enact", "moonstone"],
+    "keywords": [
+        "dnla",
+        "upnp",
+        "ssdp",
+        "webos",
+        "player",
+        "react",
+        "enact",
+        "moonstone"
+    ],
     "enact": {
         "theme": "moonstone"
     },

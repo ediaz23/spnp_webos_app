@@ -23,7 +23,9 @@ const ContextualButton = Toggleable(
     ContextualPopupDecorator(Button)
 )
 
-const SubtitleMenu = ({ locale, ...rest }) => {
+const SubtitleMenu = ({ locale, videoRef, ...rest }) => {
+    /** @type {HTMLVideoElement} */
+    const video = videoRef.current
     const subtitleSizeData = useMemo(() => [
         { name: $L('Very Small'), value: css.vsmall },
         { name: $L('Small'), value: css.small },
@@ -41,7 +43,6 @@ const SubtitleMenu = ({ locale, ...rest }) => {
     ], [])
     const subtitlePositionData = useMemo(() => [4, 3, 2, 1, 0, -1, -2, -3].map(n => n.toString()), [])
     const [subConfig, setSubConfig] = useRecoilState(subtitleConfigState)
-    const video = document.querySelector('video')
     const subtitles = Array.from(video.textTracks)
     const subtitleIndex = subtitles.findIndex(subtitle => subtitle.mode === 'showing')
     /** @param {[Number, Function]} */

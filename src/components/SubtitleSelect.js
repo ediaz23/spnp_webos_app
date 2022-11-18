@@ -9,7 +9,7 @@ import Skinnable from '@enact/moonstone/Skinnable'
 
 const PopupBaseSkin = Skinnable({ defaultSkin: 'dark' }, PopupBase)
 
-const SubtitleSelect = ({ file }) => {
+const SubtitleSelect = ({ file, videoRef }) => {
     /** @type {[Boolean, Function]} */
     const [showSubPopup, setShowSubPopup] = useState(false)
     const onShowSubPopup = useCallback(() => { setShowSubPopup(oldVar => !oldVar) }, [setShowSubPopup])
@@ -22,7 +22,7 @@ const SubtitleSelect = ({ file }) => {
                 <PopupBaseSkin open={showSubPopup}
                     onCloseButtonClick={onHideSubPopup}
                     showCloseButton>
-                    <SubtitleMenu file={file} />
+                    <SubtitleMenu file={file} videoRef={videoRef} />
                 </PopupBaseSkin>
             </FloatingLayer>
             <IconButton

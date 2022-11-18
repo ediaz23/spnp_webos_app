@@ -4,93 +4,35 @@ import IconButton from '@enact/moonstone/IconButton'
 import VideoPlayer, { MediaControls, Video } from '@enact/moonstone/VideoPlayer'
 import PropTypes from 'prop-types'
 import { useRecoilValue, useRecoilState } from 'recoil'
-import { fileIndexState, filesState } from '../recoilConfig'
+import { fileIndexState, filesState, deviceState } from '../recoilConfig'
 import silent from '../../assets/silent.ogg'
 import AudioSelect from './AudioSelect'
 import FileTypeSelect from './FileTypeSelect'
 import SubtitleSelect from './SubtitleSelect'
-import { Buffer } from 'buffer'
-import MP4Box from 'mp4box'
+//import { Buffer } from 'buffer'
+//import MP4Box from 'mp4box'
+import backend from '../api/backend'
 import css from './SubtitleSelect.module.less'
 
 
-const toBuffer = (ab) => {
-    const buffer = new Buffer(ab.byteLength)
-    const view = new Uint8Array(ab)
-    for (let i = 0; i < buffer.length; ++i) {
-        buffer[i] = view[i]
-    }
-    return buffer
-}
-
-/**
- * Extrac subtitles from mp4 file
- * @param {import('../models/Video').default} video
- * @return {Promise<Array>}
- */
-const extracMp4Subtitles = async (video) => {
-    const mp4boxfile = MP4Box.createFile()
-    const bufferSize = 1 << 23
-    const subtitles = [], control = []
-
-    let filePos = 0, loop = true
-
-    mp4boxfile.onReady = (info) => {
-        if (info.subtitleTracks) {
-            loop = info.subtitleTracks.length > 0
-            for (const track of info.subtitleTracks) {
-                track.cueList = []
-                track.addCue = function(cue) { this.cueList.push(cue) }
-                subtitles.push(track)
-                mp4boxfile.setExtractionOptions(track.id, track)
-            }
-            mp4boxfile.start()
-        } else {
-            loop = false
-        }
-    }
-
-    mp4boxfile.onSamples = async (id, textTrack, samples) => {
-        control.push(id)
-        loop = control.length < subtitles.length
-        for (const sample of samples) {
-            const text = toBuffer(sample.data).toString('utf-8').substring(2)
-            const cue = new window.VTTCue(sample.dts / sample.timescale, (sample.dts + sample.duration) / sample.timescale, text)
-            textTrack.addCue(cue)
-        }
-    }
-    const resSize = await fetch(video.res.url, { method: 'HEAD' })
-    const maxSize = parseInt(resSize.headers.get('Content-Length'))
-    while (loop) {  // up function are executed inside loop mp4boxfile.onReady mp4boxfile.onSamples
-        try {
-            const nextChunk = Math.min(filePos + bufferSize, maxSize)
-            const res = await fetch(video.res.url, { headers: { Range: `bytes=${filePos}-${nextChunk}` } })
-            if ([200, 206].includes(res.status)) {
-                const arrayBuffer = await res.arrayBuffer()
-                arrayBuffer.fileStart = filePos
-                filePos += arrayBuffer.byteLength
-                mp4boxfile.appendBuffer(arrayBuffer)
-            } else {
-                loop = false
-            }
-        } catch (err) {
-            console.log(err)
-            loop = false
-        }
-    }
-    return subtitles
-}
 
 /**
  * @param {import('../models/Video').default} video
+ * @type {import('../types').Device} device
  * @return {Promise<Array>}
  */
-const extractSubtitles = async (video) => {
+const extractSubtitles = async (video, device) => {
     let out = []
-    if (video.mimeType === 'video/mp4') {
-        out = await extracMp4Subtitles(video)
-    } else {
-        /** @todo que pasa si no es mp4 */
+    try {
+        if (video.mimeType === 'video/mp4') {
+            const res = await backend.extracMp4Subtitles({ device, url: video.res.url })
+            out = res.subtitles
+        } else {
+            /** @todo que pasa si no es mp4 */
+        }
+    } catch (err) {
+        console.log('error extractSubtitles')
+        console.log(err)
     }
     return out
 }
@@ -195,24 +137,28 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {[Boolean, Function]} */
     const [showSubtitleBtn, setShowSubtitleBtn] = useState(false)
     /** @type {[Boolean, Function]} */
+    const [showAudioBtn, setShowAudioBtn] = useState(false)
+    /** @type {[Boolean, Function]} */
     const [playNext, setPlayNext] = useState(true)
     /** @type {[Boolean, Function]} */
-    const [loading, setLoading] = useState(file.type === 'video')
+    const [loading, setLoading] = useState(true)
     /** @type {{current: HTMLVideoElement}} */
-    const mediaRef = useRef(null)
+    const videoRef = useRef(null)
+    /** @type {{current:import('@enact/moonstone/VideoPlayer/VideoPlayer').VideoPlayerBase}} */
+    const videoCompRef = useRef(null)
     /** @type {[String, Function]} */
     const [repeat, setRepeat] = useState('none')
     const fileData = useMemo(() => buildData(file), [file])
-    /** @type {[Array, Function]} */
-    const [subtitles, setSubtitles] = useState(null)
     const repeatSet = useMemo(() => { return { none: 'all', all: 'one', one: 'none' } }, [])
     /** @type {[String, Function]} */
     const [typeSelected, setTypeSelected] = useState('all')
+    /** @type {import('../types').Device} */
+    const device = useRecoilValue(deviceState)
 
     const setFileIndexCb = useCallback(index => {
-        setShowSubtitleBtn(false)
+        setLoading(true)
         setFileIndex(index)
-    }, [setShowSubtitleBtn, setFileIndex])
+    }, [setLoading, setFileIndex])
 
     const playNextFile = useCallback(param => {
         playNextFileFn({ backHome, fileIndex, files, filesReverse, repeat, setFileIndexCb, typeSelected, ...param })
@@ -222,64 +168,51 @@ const Player = ({ backHome, ...rest }) => {
     const prevFile = useCallback(() => { playNextFile({ prev: true }) }, [playNextFile])
     const togglePlayNext = useCallback(() => { setPlayNext(oldVar => !oldVar) }, [setPlayNext])
     const changeRepeat = useCallback(() => { setRepeat(oldVar => repeatSet[oldVar]) }, [setRepeat, repeatSet])
-    const setMediaRef = useCallback(node => { if (node) mediaRef.current = document.querySelector('video') }, [])
+
     const onEnded = useCallback(() => {
         if (repeat === 'one') {
-            mediaRef.current.play()
+            videoCompRef.current.play()
         } else {
             if (playNext) {
                 nextFile()
             }
         }
-    }, [nextFile, playNext, repeat])
+    }, [nextFile, playNext, repeat, videoCompRef])
 
-    /*
-    const onSelectSub = useCallback(({ selected }) => {
-        mediaRef.current.pause()
-        const currentTime = mediaRef.current.currentTime - 2
-        Array.from(mediaRef.current.textTracks).forEach(sub => { sub.mode = 'hidden' })
-        mediaRef.current.textTracks[selected].mode = 'showing'
-        mediaRef.current.currentTime = Math.max(0, currentTime)
-        mediaRef.current.play()
-        onHideSubList()
-    }, [mediaRef, onHideSubList])
-    const subList = useCallback(() => (
-        <AudioList audioTracks={mediaRef.current.textTracks} onSelectAudio={onSelectSub} />
-    ), [mediaRef, onSelectSub])
-    */
-
-    useEffect(() => {
-        const video = document.querySelector('video')
-        if (video) {
-            mediaRef.current = video
+    const onLoadedMetadata = useCallback(() => {
+        if (file.type === 'video') {
+            const video = videoRef.current
             if (!video.classList.contains(css.video)) {
                 video.classList.add(css.video)
             }
+            setShowSubtitleBtn(video.textTracks && video.textTracks.length > 0)
+            setShowAudioBtn(video.audioTracks && video.audioTracks.length > 1)
         }
-        if (file.type === 'video') {
-            extractSubtitles(file).then(setSubtitles)
-        }
-    }, [file])
+        videoRef.current.play()
+    }, [file, setShowAudioBtn, setShowSubtitleBtn])
+
+    useEffect(() => { videoRef.current = document.querySelector('video') }, [file, videoCompRef])
+
     useEffect(() => {
-        if (mediaRef.current) {
-            const video = mediaRef.current
-            if (subtitles) {
+        setShowAudioBtn(false)
+        setShowSubtitleBtn(false)
+        if (file.type === 'video') {
+            extractSubtitles(file, device).then(subtitles => {
                 for (const sub of subtitles) {
-                    const track = video.addTextTrack(sub.type, sub.name, sub.language)
+                    const track = videoRef.current.addTextTrack(sub.type, sub.name, sub.language)
                     for (const cue of sub.cueList) {
-                        track.addCue(cue)
+                        const cueObj = new window.VTTCue(cue.start, cue.end, cue.text)
+                        track.addCue(cueObj)
                     }
                 }
-            }
-            if (video.textTracks && video.textTracks.length > 0) {
-                setShowSubtitleBtn(true)
-            }
-            if (subtitles) {
                 setLoading(false)
-            }
+                videoRef.current.load()
+            })
+        } else {
+            setLoading(false)
+            videoRef.current.load()
         }
-
-    }, [mediaRef, subtitles])
+    }, [file, setShowAudioBtn, setShowSubtitleBtn, setLoading, videoCompRef, device, videoRef])
 
     return (
         <div className={rest.className}>
@@ -288,8 +221,9 @@ const Player = ({ backHome, ...rest }) => {
                 onJumpForward={nextFile}
                 onEnded={onEnded}
                 loading={loading}
-                ref={setMediaRef}>
-                <Video id={file.id}>
+                ref={videoCompRef}
+                noAutoPlay>
+                <Video id={file.id} onLoadedMetadata={onLoadedMetadata}>
                     <source src={fileData.source} type={fileData.mimeType} />
                 </Video>
                 <MediaControls>
@@ -308,10 +242,10 @@ const Player = ({ backHome, ...rest }) => {
                             arrowhookright
                         </IconButton>
                         {showSubtitleBtn &&
-                            <SubtitleSelect file={file} />
+                            <SubtitleSelect file={file} videoRef={videoRef} />
                         }
-                        {mediaRef.current && mediaRef.current.audioTracks && mediaRef.current.audioTracks.length > 1 &&
-                            <AudioSelect file={file} />
+                        {showAudioBtn &&
+                            <AudioSelect file={file} videoRef={videoRef} />
                         }
                     </rightComponents>
                 </MediaControls>

@@ -6,8 +6,8 @@ import AudioList from './AudioList'
 
 const IconButtonWithPopup = ContextualPopupDecorator(IconButton)
 
-const AudioSelect = () => {
-    const video = document.querySelector('video')
+const AudioSelect = ({ videoRef }) => {
+    const video = videoRef.current
 
     /** @type {[Boolean, Function]} */
     const [showAudioList, setShowAudioList] = useState(false)

@@ -113,6 +113,15 @@ const search = async ({ id, start, count, query, device }) =>
 const metadata = async ({ itemId, device }) =>
     makeRequest({ method: 'metadata', parameters: { deviceData: device, itemId } })
 
+/**
+ * @param {Object} obj
+ * @param {Object} obj.device
+ * @param {String} obj.url
+ * @returns {Promise<{subtitles: Array}>}
+ */
+const extracMp4Subtitles = async ({ device, url }) =>
+    makeRequest({ method: 'extracMp4Subtitles', parameters: { deviceData: device, url } })
+
 const mediaTest = async () =>
     makeRequest({ url: 'com.webos.service.mediaindexer', method: 'getDeviceList' })
 
@@ -125,4 +134,5 @@ export default {
     search,
     metadata,
     mediaTest,
+    extracMp4Subtitles,
 }
