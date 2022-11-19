@@ -1,5 +1,6 @@
 
-import { useCallback, useState, useMemo } from 'react'
+import { useCallback, useState, useMemo, useEffect, useRef } from 'react'
+import spotlight from '@enact/spotlight'
 import { useRecoilState } from 'recoil'
 import Button from '@enact/moonstone/Button'
 import ContextualPopupDecorator from '@enact/moonstone/ContextualPopupDecorator'
@@ -7,7 +8,7 @@ import { Cell, Row } from '@enact/ui/Layout'
 import Toggleable from '@enact/ui/Toggleable'
 import Marquee from '@enact/moonstone/Marquee'
 import Layout from '@enact/ui/Layout'
-import Switch from '@enact/moonstone/Switch'
+import SwitchItem from '@enact/moonstone/SwitchItem'
 import RadioItem from '@enact/moonstone/RadioItem'
 import Group from '@enact/ui/Group'
 import { I18nContextDecorator } from '@enact/i18n/I18nDecorator'
@@ -22,6 +23,7 @@ const ContextualButton = Toggleable(
     { prop: 'open', toggle: 'onClick', deactivate: 'onClose' },
     ContextualPopupDecorator(Button)
 )
+
 
 const SubtitleMenu = ({ locale, videoRef, ...rest }) => {
     /** @type {HTMLVideoElement} */
@@ -55,6 +57,7 @@ const SubtitleMenu = ({ locale, videoRef, ...rest }) => {
         let out = languages.getName(sub.language, localeInfo.language)
         return out || ((sub.language || $L('Noname')) + ' ' + index)
     }, [localeInfo])
+    const switchRef = useRef(null)
 
     /** disable all subtitles */
     const disableSubs = useCallback(() => {
@@ -170,19 +173,25 @@ const SubtitleMenu = ({ locale, videoRef, ...rest }) => {
             direction="down"
             popupComponent={renderComp}
             disabled={!isSelected}
-            spotlightRestrict="self-only">
+            showCloseButton>
             {value}
         </ContextualButton>
     )
+
+    useEffect(() => { spotlight.focus('.switchSub') }, [])
 
     return (
         <Layout align="center" {...rest}>
             <Row style={{ width: '100%' }}>
                 <Cell style={{ textAlign: 'center' }} >
                     <Marquee alignment='center'>{$L('Subtitle')}</Marquee>
-                    <Switch skin="light"
+                    <SwitchItem skin="light"
                         onToggle={toggleSelected}
-                        selected={isSelected} />
+                        selected={isSelected}
+                        className='switchSub'
+                        ref={switchRef} >
+                        {$L('Activar')}
+                    </SwitchItem>
                 </Cell>
                 <Cell style={{ textAlign: 'center' }} >
                     <Marquee alignment='center'>{$L('Language')}</Marquee>

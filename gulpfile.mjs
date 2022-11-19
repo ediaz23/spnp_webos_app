@@ -71,7 +71,8 @@ gulp.task('app', cb => {
 })
 
 
-gulp.task('build', gulp.series('clean', 'pack', 'donwloadService', 'installService', 'buildService', 'app'));
+gulp.task('build', gulp.series('clean', 'pack', 'app'));
+gulp.task('build-dev', gulp.series('clean', 'pack', 'donwloadService', 'installService', 'buildService', 'app'));
 gulp.task('build-p', gulp.series('clean', 'pack-p', 'donwloadService', 'installService', 'buildService-p', 'app'));
 
 export default gulp

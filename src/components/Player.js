@@ -9,8 +9,6 @@ import silent from '../../assets/silent.ogg'
 import AudioSelect from './AudioSelect'
 import FileTypeSelect from './FileTypeSelect'
 import SubtitleSelect from './SubtitleSelect'
-//import { Buffer } from 'buffer'
-//import MP4Box from 'mp4box'
 import backend from '../api/backend'
 import css from './SubtitleSelect.module.less'
 
@@ -202,6 +200,7 @@ const Player = ({ backHome, ...rest }) => {
                     const track = videoRef.current.addTextTrack(sub.type, sub.name, sub.language)
                     for (const cue of sub.cueList) {
                         const cueObj = new window.VTTCue(cue.start, cue.end, cue.text)
+                        cueObj.line = -2
                         track.addCue(cueObj)
                     }
                 }
