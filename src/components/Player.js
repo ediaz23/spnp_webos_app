@@ -9,7 +9,7 @@ import silent from '../../assets/silent.ogg'
 import AudioSelect from './AudioSelect'
 import FileTypeSelect from './FileTypeSelect'
 import SubtitleSelect from './SubtitleSelect'
-import backend from '../api/backend'
+import useExtractSubtitles from '../hooks/extractSubtitles'
 import css from './SubtitleSelect.module.less'
 
 
@@ -19,7 +19,7 @@ import css from './SubtitleSelect.module.less'
  * @type {import('../types').Device} device
  * @return {Promise<Array>}
  */
-const extractSubtitles = async (video, device) => {
+/*const extractSubtitles = async (video, device) => {
     let out = []
     try {
         if (video.mimeType === 'video/mp4') {
@@ -29,7 +29,6 @@ const extractSubtitles = async (video, device) => {
                 out = subtitles
             }
         } else {
-            /** @todo que pasa si no es mp4 */
         }
     } catch (err) {
         console.log('error extractSubtitles')
@@ -37,7 +36,7 @@ const extractSubtitles = async (video, device) => {
     }
     return out
 }
-
+*/
 /**
  * Get metadat from file to pass to player
  * @param {import('../models/File').default} file
@@ -127,6 +126,8 @@ const playNextFileFn = ({ backHome, fileIndex, files, filesReverse, repeat, setF
  * @param {Object} obj.rest
  */
 const Player = ({ backHome, ...rest }) => {
+    /** @type {Function} */
+    const extractSubtitles = useExtractSubtitles()
     /** @type {[Number, Function]} */
     const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
     /** @type {Array<import('../models/File').default} */
@@ -214,7 +215,7 @@ const Player = ({ backHome, ...rest }) => {
             setLoading(false)
             videoRef.current.load()
         }
-    }, [file, setShowAudioBtn, setShowSubtitleBtn, setLoading, videoCompRef, device, videoRef])
+    }, [file, setShowAudioBtn, setShowSubtitleBtn, setLoading, videoCompRef, device, videoRef, extractSubtitles])
 
     return (
         <div className={rest.className}>
