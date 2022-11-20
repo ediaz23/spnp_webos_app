@@ -57,6 +57,6 @@ export const subtitleConfigState = atom({
     default: {
         colorIndex: 0,
         sizeIndex: 2,
-        positionIndex: 6,
+        positionIndex: 7,
     }
 })

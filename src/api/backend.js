@@ -117,10 +117,21 @@ const metadata = async ({ itemId, device }) =>
  * @param {Object} obj
  * @param {Object} obj.device
  * @param {String} obj.url
+ * @param {Number} obj.size
+ * @param {Array<{type: String, size: Number, pos: Number}>} obj.atoms
  * @returns {Promise<{subtitles: Array}>}
  */
-const extracMp4Subtitles = async ({ device, url }) =>
-    makeRequest({ method: 'extracMp4Subtitles', parameters: { deviceData: device, url } })
+const extracMp4Subtitles = async ({ device, ...rest }) =>
+    makeRequest({ method: 'extracMp4Subtitles', parameters: { deviceData: device, ...rest } })
+
+/**
+ * @param {Object} obj
+ * @param {Object} obj.device
+ * @param {String} obj.url
+ * @returns {Promise<{metadata: {size: Number, atoms: Array<{type: String, size: Number, pos: Number}>}}>}
+ */
+const mp4metadata = async ({ device, ...rest }) =>
+    makeRequest({ method: 'mp4metadata', parameters: { deviceData: device, ...rest } })
 
 const mediaTest = async () =>
     makeRequest({ url: 'com.webos.service.mediaindexer', method: 'getDeviceList' })
@@ -135,4 +146,5 @@ export default {
     metadata,
     mediaTest,
     extracMp4Subtitles,
+    mp4metadata,
 }

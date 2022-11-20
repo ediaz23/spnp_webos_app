@@ -23,8 +23,11 @@ const extractSubtitles = async (video, device) => {
     let out = []
     try {
         if (video.mimeType === 'video/mp4') {
-            const res = await backend.extracMp4Subtitles({ device, url: video.res.url })
-            out = res.subtitles
+            const { metadata } = await backend.mp4metadata({ device, url: video.res.url })
+            if (metadata.atoms.find(atom => atom.type === 'moov')) {
+                const { subtitles } = await backend.extracMp4Subtitles({ device, url: video.res.url, ...metadata })
+                out = subtitles
+            }
         } else {
             /** @todo que pasa si no es mp4 */
         }
@@ -200,7 +203,7 @@ const Player = ({ backHome, ...rest }) => {
                     const track = videoRef.current.addTextTrack(sub.type, sub.name, sub.language)
                     for (const cue of sub.cueList) {
                         const cueObj = new window.VTTCue(cue.start, cue.end, cue.text)
-                        cueObj.line = -2
+                        cueObj.line = -3
                         track.addCue(cueObj)
                     }
                 }
