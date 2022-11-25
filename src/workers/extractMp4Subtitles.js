@@ -1,16 +1,11 @@
+/* global MP4Box */
+/* global importScripts */
+/* global self */
 
-import { Buffer } from 'buffer'
-import MP4Box from 'mp4box'
+const queue = Promise.resolve()
+let okey = false
+let Buffer = null
 
-
-const toBuffer = (ab) => {
-    const buffer = Buffer.alloc(ab.byteLength)
-    const view = new Uint8Array(ab)
-    for (let i = 0; i < buffer.length; ++i) {
-        buffer[i] = view[i]
-    }
-    return buffer
-}
 
 /**
  * Extrar subtitles from url
@@ -22,47 +17,55 @@ const toBuffer = (ab) => {
 const extracMp4Subtitles = async ({ url, atoms }) => {
     const mp4boxfile = MP4Box.createFile(false)
     const subtitles = [], control = new Set()
-    const bufferSize = (1 << 20) * 23 // 5 Mb
+    const bufferSize = (1 << 20) * 5 // 5 Mb
     const ignore = ['mdat', 'free']
-    let bufferPos = 0, okey = true
+    let bufferPos = 0
 
     mp4boxfile.onReady = (info) => {
         console.log('extracMp4Subtitles.ready')
         if (info.subtitleTracks) {
             okey = info.subtitleTracks.length > 0
             for (const track of info.subtitleTracks) {
+                subtitles.push({ ...track })
                 track.cueList = []
                 track.addCue = function(cue) { this.cueList.push(cue) }
-                subtitles.push(track)
-                mp4boxfile.setExtractionOptions(track.id, track, { nbSamples: 500 })
+                mp4boxfile.setExtractionOptions(track.id, track, { nbSamples: 256 })
             }
             mp4boxfile.start()
         }
+        self.postMessage({ action: 'subtitles', subtitles })
     }
+
     mp4boxfile.onSamples = (id, textTrack, samples) => {
         console.log('extracMp4Subtitles.onSamples')
         control.add(id)
+        const cues = []
         for (const sample of samples) {
-            const text = toBuffer(sample.data).toString('utf-8').substring(2)
-            textTrack.addCue({
+            const text = Buffer.from(sample.data.buffer).toString('utf-8').substring(2)
+            const cue = {
                 start: sample.dts / sample.timescale,
                 end: (sample.dts + sample.duration) / sample.timescale,
                 text: text,
-            })
+            }
+            cues.push(cue)
+            textTrack.addCue(cue)
         }
         okey = control.size < subtitles.length || textTrack.cueList.length < textTrack.nb_samples
         mp4boxfile.releaseUsedSamples(id, textTrack.cueList.length)
+        self.postMessage({ action: 'cues', cues, id })  // eslint-disable-line
     }
+
     mp4boxfile.onError = (res) => {
         console.error('extracMp4Subtitles mp4boxfile.Error')
         console.error(res)
         okey = false
+        self.postMessage({ action: 'error', error: res })  // eslint-disable-line
     }
     const readAtom = async atom => {
         console.log('extracMp4Subtitles.readAtom ' + atom.type)
         const endAtom = atom.pos + atom.size
         for (let pos = atom.pos; pos < endAtom && okey; pos += bufferSize) {
-            const nextChunk = Math.min(pos + bufferSize, endAtom - 1)
+            const nextChunk = Math.min(pos + bufferSize, endAtom) - 1
             const res = await fetch(url, { headers: { Range: `bytes=${pos}-${nextChunk}` } })
             if ([200, 206].includes(res.status)) {
                 const arrayBuffer = await res.arrayBuffer()
@@ -71,6 +74,7 @@ const extracMp4Subtitles = async ({ url, atoms }) => {
                 mp4boxfile.appendBuffer(arrayBuffer)
             } else {
                 okey = false
+                self.postMessage({ action: 'error', error: 'Req status error ' + res.status })  // eslint-disable-line
             }
         }
     }
@@ -85,6 +89,7 @@ const extracMp4Subtitles = async ({ url, atoms }) => {
         await readAtom(atomMdat)
     }
     mp4boxfile.flush()
+    self.postMessage({ action: 'end' })
     return subtitles
 }
 
@@ -112,28 +117,40 @@ const getMp4Atoms = async (url, fileSize) => {
 }
 
 /**
- * @param {import('../models/Video').default} video
- * @type {import('../types').Device} device
- * @return {Promise<Array>}
+ * Extrac subtitltes and notify
  */
-const extractSubtitles = async (video) => {
-    let out = []
+const extractSubtitles = async ({ url, size }) => {
     try {
-        if (video.mimeType === 'video/mp4') {
-            const atoms = await getMp4Atoms(video.res.url, video.res.size)
-            if (atoms.find(atom => atom.type === 'moov')) {
-                out = await extracMp4Subtitles({ url: video.res.url, atoms })
-            }
+        okey = true
+        const atoms = await getMp4Atoms(url, size)
+        if (atoms.find(atom => atom.type === 'moov')) {
+            await extracMp4Subtitles({ url, atoms })
         } else {
-            /** @todo que pasa si no es mp4 */
+            self.postMessage({ action: 'subtitles', subtitles: [] })  // eslint-disable-line
         }
-    } catch (err) {
-        console.log('error extractSubtitles')
-        console.log(err)
+    } catch (error) {
+        console.error('extractSubtitles error')
+        console.error(error)
+        self.postMessage({ action: 'error', error })  // eslint-disable-line
+    } finally {
+        okey = false
     }
-    return out
 }
 
-export default function useExtractSubtitles() {
-    return extractSubtitles
-}
+self.addEventListener('message', function(event) {
+    const { action, data } = event.data
+    if (action === 'init') {
+        try {
+            importScripts(data.mp4Url)
+            importScripts(data.bufferUrl)
+            Buffer = self.Buffer
+        } catch (err) {
+            console.log('error importando')
+            console.log(err)
+        }
+    } else if (action === 'getSubtitles') {
+        queue.then(() => extractSubtitles(data))
+    } else if (action === 'cancel') {
+        okey = false
+    }
+})

@@ -52,7 +52,8 @@
     "eslintIgnore": [
         "node_modules/*",
         "build/*",
-        "dist/*"
+        "dist/*",
+        "libs/*"
     ],
     "dependencies": {
         "@cospired/i18n-iso-languages": "^4.0.0",
@@ -62,9 +63,7 @@
         "@enact/spotlight": "^4.5.0",
         "@enact/ui": "^4.5.0",
         "@enact/webos": "^4.5.0",
-        "buffer": "^6.0.3",
         "ilib": "npm:ilib-webos@^14.14.0-webos1",
-        "mp4box": "^0.5.2",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
