@@ -3,8 +3,7 @@
 /* global self */
 
 const queue = Promise.resolve()
-let okey = false
-let Buffer = null
+let okey = false, cancel = false, Buffer = null
 
 
 /**
@@ -64,7 +63,7 @@ const extracMp4Subtitles = async ({ url, atoms }) => {
     const readAtom = async atom => {
         console.log('extracMp4Subtitles.readAtom ' + atom.type)
         const endAtom = atom.pos + atom.size
-        for (let pos = atom.pos; pos < endAtom && okey; pos += bufferSize) {
+        for (let pos = atom.pos; pos < endAtom && okey && !cancel; pos += bufferSize) {
             const nextChunk = Math.min(pos + bufferSize, endAtom) - 1
             const res = await fetch(url, { headers: { Range: `bytes=${pos}-${nextChunk}` } })
             if ([200, 206].includes(res.status)) {
@@ -82,14 +81,15 @@ const extracMp4Subtitles = async ({ url, atoms }) => {
         if (!ignore.includes(atom.type)) {
             await readAtom(atom)
         }
-        if (!okey) { break }
+        if (!okey || cancel) { break }
     }
     const atomMdat = atoms.find(atom => atom.type === 'mdat')
-    if (okey && atomMdat) {
+    if (okey && !cancel && atomMdat) {
         await readAtom(atomMdat)
+        mp4boxfile.flush()
+        self.postMessage({ action: 'end' })
     }
-    mp4boxfile.flush()
-    self.postMessage({ action: 'end' })
+    console.log('extracMp4Subtitles end')
     return subtitles
 }
 
@@ -122,6 +122,7 @@ const getMp4Atoms = async (url, fileSize) => {
 const extractSubtitles = async ({ url, size }) => {
     try {
         okey = true
+        cancel = false
         const atoms = await getMp4Atoms(url, size)
         if (atoms.find(atom => atom.type === 'moov')) {
             await extracMp4Subtitles({ url, atoms })
@@ -139,6 +140,7 @@ const extractSubtitles = async ({ url, size }) => {
 
 self.addEventListener('message', function(event) {
     const { action, data } = event.data
+    console.log('extractMp4Subtitles ' + action)
     if (action === 'init') {
         try {
             importScripts(data.mp4Url)
@@ -151,6 +153,6 @@ self.addEventListener('message', function(event) {
     } else if (action === 'getSubtitles') {
         queue.then(() => extractSubtitles(data))
     } else if (action === 'cancel') {
-        okey = false
+        cancel = true
     }
 })

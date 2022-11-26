@@ -9,8 +9,8 @@ import silent from '../../assets/silent.ogg'
 import AudioSelect from './AudioSelect'
 import FileTypeSelect from './FileTypeSelect'
 import SubtitleSelect from './SubtitleSelect'
-import useExtractMp4Subtitles from '../hooks/extractMp4Subtitles'
 import usePlayNext from '../hooks/playNextFile'
+import useCreateSubtitles from '../hooks/createSubtitles'
 import css from './SubtitleSelect.module.less'
 
 
@@ -45,50 +45,6 @@ const buildData = file => {
     return { title, mimeType, source, imageUrl }
 }
 
-const createSubtitles = ({ file, subtitleWorker, stopLoading, videoRef }) => {
-    const subtitlesRef = {}
-    const cleanExtractMp4Subtitle = (processFunc) => {
-        subtitleWorker.removeEventListener('message', processFunc)
-        subtitleWorker.removeEventListener('messageerror', stopLoading)
-        subtitleWorker.removeEventListener('error', stopLoading)
-    }
-
-    const processSubtitles = (event) => {
-        const { action, ...params } = event.data
-        if (action === 'subtitles') {
-            const { subtitles } = params
-            for (const sub of subtitles) {
-                const track = videoRef.current.addTextTrack(sub.type, sub.name, sub.language)
-                sub.track = track
-            }
-            stopLoading()
-            subtitlesRef.current = subtitles
-        } else if (action === 'cues') {
-            const { cues } = params
-            const subtitle = subtitlesRef.current.find(sub => sub.id === params.id)
-            if (subtitle) {
-                const { track } = subtitle
-                for (const cue of cues) {
-                    const cueObj = new window.VTTCue(cue.start, cue.end, cue.text)
-                    cueObj.line = -3
-                    track.addCue(cueObj)
-                }
-            }
-        } else if (action === 'error') {
-            console.error(params)
-            stopLoading()
-            cleanExtractMp4Subtitle(processSubtitles)
-        } else if (action === 'end') {
-            cleanExtractMp4Subtitle(processSubtitles)
-        }
-    }
-
-    const dataParam = { url: file.res.url, size: file.res.size }
-    subtitleWorker.addEventListener('message', processSubtitles)
-    subtitleWorker.addEventListener('messageerror', stopLoading)
-    subtitleWorker.addEventListener('error', stopLoading)
-    subtitleWorker.postMessage({ action: 'getSubtitles', data: dataParam })
-}
 
 /**
  * @param {Object} obj
@@ -97,7 +53,6 @@ const createSubtitles = ({ file, subtitleWorker, stopLoading, videoRef }) => {
  * @param {Object} obj.rest
  */
 const Player = ({ backHome, ...rest }) => {
-    const extractMp4Subtitle = useExtractMp4Subtitles()
     /** @type {Number} */
     const fileIndex = useRecoilValue(fileIndexState)
     /** @type {Array<import('../models/File').default} */
@@ -123,6 +78,7 @@ const Player = ({ backHome, ...rest }) => {
     /** @type {[String, Function]} */
     const [typeSelected, setTypeSelected] = useState('all')
     const playNextFn = usePlayNext()
+    const createSubtitles = useCreateSubtitles(file)
 
     const playNextFile = useCallback(param => {
         playNextFn({ backHome, repeat, typeSelected, setLoading, ...param })
@@ -173,15 +129,15 @@ const Player = ({ backHome, ...rest }) => {
         if (loading) {
             if (file.type === 'video') {
                 if (file.mimeType === 'video/mp4') {
-                    createSubtitles({ file, stopLoading, subtitleWorker: extractMp4Subtitle, videoRef })
+                    createSubtitles({ stopLoading, videoRef })
                 } else {
                     stopLoading()
                 }
+            } else {
+                stopLoading()
             }
-        } else {
-            stopLoading()
         }
-    }, [file, setShowAudioBtn, setShowSubtitleBtn, loading, extractMp4Subtitle, stopLoading])
+    }, [file, setShowAudioBtn, setShowSubtitleBtn, loading, stopLoading, createSubtitles])
 
     return (
         <div className={rest.className}>
