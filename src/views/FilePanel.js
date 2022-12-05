@@ -145,7 +145,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
 
     return (
         <Panel {...rest}>
-            <Header title={title} titleBelow={titleBelow} >
+            <Header title={title} titleBelow={titleBelow}>
                 <Input placeholder={$L('Search')} value={value} onChange={handleChange} />
                 <IconButton size="small" onClick={searchButton}>search</IconButton>
                 <IconButton size="small" onClick={refreshData}>refresh</IconButton>

@@ -4,6 +4,7 @@ import Spinner from '@enact/moonstone/Spinner'
 import Popup from '@enact/moonstone/Popup'
 import { Header, Panel } from '@enact/moonstone/Panels'
 import $L from '@enact/i18n/$L'
+import IconButton from '@enact/moonstone/IconButton'
 import PropTypes from 'prop-types'
 import backend from '../api/backend'
 import DeviceList from '../components/DeviceList'
@@ -45,11 +46,14 @@ const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     }, [])
 
     const handleOnClose = useCallback(() => { setMessage('') }, [])
+    const refreshData = useCallback(() => { fetchData() }, [fetchData,])
     useEffect(() => { fetchData() }, [fetchData])
 
     return (
         <Panel {...rest}>
-            <Header title={title} titleBelow={titleBelow} />
+            <Header title={title} titleBelow={titleBelow}>
+                <IconButton size="small" onClick={refreshData}>refresh</IconButton>
+            </Header>
             {isLoading &&
                 <Spinner transparent centered>{$L('Loading...')}</Spinner>
             }
