@@ -20,7 +20,13 @@ export default function usePlayNext() {
         const video = document.createElement('video')
         const validAudio = f => f.type === 'music' && audio.canPlayType(f.mimeType)
         const validImage = f => f.type === 'image'
-        const validVideo = f => f.type === 'video' && video.canPlayType(f.mimeType)
+        const validVideo = f => {
+            if (f.type === 'video') {
+                const videoPlay = video.canPlayType(f.mimeType)
+                console.log(`Test play ${f.type} ${f.mimeType} ${videoPlay}`)
+            }
+            return f.type === 'video'
+        }
         /** @param {import('../models/File').default} f */
         const validFile = f => {
             let out = false

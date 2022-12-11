@@ -35,7 +35,8 @@ const FileList = ({ id, files, showMessage, ...rest }) => {
         if (file.type !== 'folder') {
             let canPlay = true
             if (file.type === 'video') {
-                canPlay = document.createElement('video').canPlayType(file.mimeType)
+                const videoPlay = document.createElement('video').canPlayType(file.mimeType)
+                console.log(`Test play ${file.type} ${file.mimeType} ${videoPlay}`)
             } else if (file.type === 'music') {
                 canPlay = document.createElement('audio').canPlayType(file.mimeType)
             }

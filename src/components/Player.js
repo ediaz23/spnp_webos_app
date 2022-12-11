@@ -149,7 +149,7 @@ const Player = ({ backHome, ...rest }) => {
                 ref={videoCompRef}
                 noAutoPlay>
                 <Video id={file.id} onLoadedMetadata={onLoadedMetadata}>
-                    <source src={fileData.source} type={fileData.mimeType} />
+                    <source src={fileData.source} />
                 </Video>
                 <MediaControls>
                     <leftComponents>
