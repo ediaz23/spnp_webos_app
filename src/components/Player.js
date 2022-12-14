@@ -128,11 +128,7 @@ const Player = ({ backHome, ...rest }) => {
         setShowSubtitleBtn(false)
         if (loading) {
             if (file.type === 'video') {
-                if (file.mimeType === 'video/mp4') {
-                    createSubtitles({ stopLoading, videoRef })
-                } else {
-                    stopLoading()
-                }
+                createSubtitles({ stopLoading, videoRef })
             } else {
                 stopLoading()
             }

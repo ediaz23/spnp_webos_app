@@ -3,7 +3,11 @@
 /* global self */
 
 const queue = Promise.resolve()
-let okey = false, cancel = false, Buffer = null
+let okey = false, cancel = false
+/** @type {import('buffer/').Buffer} */
+let Buffer = null
+/** @type {import('matroska-subtitles').SubtitleParser} */
+let SubtitleParser = null
 
 
 /**
@@ -14,6 +18,7 @@ let okey = false, cancel = false, Buffer = null
  * @return {Promise}
  */
 const extracMp4Subtitles = async ({ url, atoms }) => {
+    /** @type {import('mp4box').ISOFile} */
     const mp4boxfile = MP4Box.createFile(false)
     const subtitles = [], control = new Set()
     const bufferSize = (1 << 20) * 5 // 5 Mb
@@ -87,7 +92,6 @@ const extracMp4Subtitles = async ({ url, atoms }) => {
     if (okey && !cancel && atomMdat) {
         await readAtom(atomMdat)
         mp4boxfile.flush()
-        self.postMessage({ action: 'end' })
     }
     console.log('extracMp4Subtitles end')
     return subtitles
@@ -95,11 +99,12 @@ const extracMp4Subtitles = async ({ url, atoms }) => {
 
 /**
  * Returns mp4 atoms
- * @param {String} url
- * @param {Number} fileSize
+ * @param {Object} obj
+ * @param {String} obj.url
+ * @param {Number} obj.fileSize
  * @returns {Promise<{size: Number, atoms: Array<{type: String, size: Number, pos: Number}>}>}
  */
-const getMp4Atoms = async (url, fileSize) => {
+const getMp4Atoms = async ({ url, fileSize }) => {
     const buffers = []
     const basicSize = 8
     let size = 0
@@ -117,18 +122,82 @@ const getMp4Atoms = async (url, fileSize) => {
 }
 
 /**
+ * Returns mp4 atoms
+ * @param {Object} obj
+ * @param {String} obj.url
+ * @param {Number} obj.fileSize
+ */
+const extracMkvSubtitles = async ({ url, fileSize }) => {
+    /** @type {import('matroska-subtitles').SubtitleParser} */
+    const parser = new SubtitleParser()
+    let bufferSize = (1 << 20) * 2 // 2 Mb
+    let pos = 0, bufferPos = 0
+    const subtitles = []
+
+    parser.once('tracks', (tracks) => {
+        for (const track of tracks) {
+            subtitles.push({
+                id: track.number,
+                name: track.name,
+                language: track.language || 'eng',
+                type: 'subtitles'
+            })
+        }
+        self.postMessage({ action: 'subtitles', subtitles: subtitles })  // eslint-disable-line
+        bufferSize = (1 << 20) * 5  // 5 MB
+        okey = subtitles.length > 0
+    })
+
+    // afterwards each subtitle is emitted
+    parser.on('subtitle', (subtitle, trackNumber) => {
+        const cues = [{
+            start: subtitle.time / 1000.0,
+            end: (subtitle.time + subtitle.duration) / 1000.0,
+            text: subtitle.text.replace(/\\n/gi, '\n'),
+        }]
+        self.postMessage({ action: 'cues', cues, id: trackNumber })  // eslint-disable-line
+    })
+    pos = 0
+    while (pos < fileSize && okey && !cancel) {
+        const nextChunk = Math.min(pos + bufferSize, fileSize)
+        const res = await fetch(url, { headers: { Range: `bytes=${pos}-${nextChunk}` } })
+        pos += bufferSize + 1
+        if ([200, 206].includes(res.status)) {
+            const arrayBuffer = await res.arrayBuffer()
+            /** @type {Buffer} */
+            const buffer = Buffer.from(arrayBuffer)
+            bufferPos += arrayBuffer.byteLength
+            parser.write(buffer)
+        } else {
+            okey = false
+            self.postMessage({ action: 'error', error: 'Req status error ' + res.status })  // eslint-disable-line
+        }
+    }
+    parser.end()
+    console.log(`termino ${bufferPos} - ${fileSize}`)
+    return subtitles
+}
+
+/**
  * Extrac subtitltes and notify
  */
 const extractSubtitles = async ({ url, size, mimeType }) => {
     try {
         okey = true
         cancel = false
-        const atoms = await getMp4Atoms(url, size)
-        if (atoms.find(atom => atom.type === 'moov')) {
-            await extracMp4Subtitles({ url, atoms })
+        if (mimeType === 'video/mp4') {
+            const atoms = await getMp4Atoms({ url, fileSize: size })
+            if (atoms.find(atom => atom.type === 'moov')) {
+                await extracMp4Subtitles({ url, atoms })
+            } else {
+                self.postMessage({ action: 'subtitles', subtitles: [] })  // eslint-disable-line
+            }
+        } else if (mimeType === 'video/x-matroska') {
+            await extracMkvSubtitles({ url, fileSize: size })
         } else {
-            self.postMessage({ action: 'subtitles', subtitles: [] })  // eslint-disable-line
+            throw new Error('Subtitle type no supported')
         }
+        self.postMessage({ action: 'end' })
     } catch (error) {
         console.error('extractSubtitles error')
         console.error(error)
@@ -140,13 +209,14 @@ const extractSubtitles = async ({ url, size, mimeType }) => {
 
 self.addEventListener('message', function(event) {
     const { action, data } = event.data
-    console.log('extractMp4Subtitles ' + action)
+    console.log('extractSubtitles ' + action)
     if (action === 'init') {
         try {
             for (const lib of data.libs) {
                 importScripts(lib)
             }
             Buffer = self.Buffer
+            SubtitleParser = self.SubtitleParser
         } catch (err) {
             console.log('error importando')
             console.log(err)

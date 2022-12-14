@@ -73,8 +73,11 @@
     },
     "devDependencies": {
         "@types/webostvjs": "^1.2.0",
+        "buffer": "^6.0.3",
         "del": "^7.0.0",
         "gulp": "^4.0.2",
-        "gulp-shell": "^0.8.0"
+        "gulp-shell": "^0.8.0",
+        "matroska-subtitles": "^3.3.2",
+        "mp4box": "^0.5.2"
     }
 }

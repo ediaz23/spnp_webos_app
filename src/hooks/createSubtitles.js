@@ -28,6 +28,7 @@ export default function useCreateSubtitles(file) {
                 stopLoading()
                 subtitlesRef.current = subtitles
             } else if (action === 'cues') {
+                /** @type {{cues: Array}} */
                 const { cues } = params
                 const subtitle = subtitlesRef.current.find(sub => sub.id === params.id)
                 if (subtitle) {
@@ -47,10 +48,14 @@ export default function useCreateSubtitles(file) {
             }
         }
 
-        const dataParam = { url: file.res.url, size: file.res.size, mimeType: file.mimeType }
-        subtitleWorker.addEventListener('message', processSubtitles)
-        subtitleWorker.addEventListener('messageerror', stopLoading)
-        subtitleWorker.addEventListener('error', stopLoading)
-        subtitleWorker.postMessage({ action: 'getSubtitles', data: dataParam })
+        if (['video/mp4', 'video/x-matroska'].includes(file.mimeType)) {
+            const dataParam = { url: file.res.url, size: file.res.size, mimeType: file.mimeType }
+            subtitleWorker.addEventListener('message', processSubtitles)
+            subtitleWorker.addEventListener('messageerror', stopLoading)
+            subtitleWorker.addEventListener('error', stopLoading)
+            subtitleWorker.postMessage({ action: 'getSubtitles', data: dataParam })
+        } else {
+            stopLoading()
+        }
     }, [file, subtitleWorker])
 }
