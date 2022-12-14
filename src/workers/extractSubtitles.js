@@ -119,7 +119,7 @@ const getMp4Atoms = async (url, fileSize) => {
 /**
  * Extrac subtitltes and notify
  */
-const extractSubtitles = async ({ url, size }) => {
+const extractSubtitles = async ({ url, size, mimeType }) => {
     try {
         okey = true
         cancel = false
@@ -143,8 +143,9 @@ self.addEventListener('message', function(event) {
     console.log('extractMp4Subtitles ' + action)
     if (action === 'init') {
         try {
-            importScripts(data.mp4Url)
-            importScripts(data.bufferUrl)
+            for (const lib of data.libs) {
+                importScripts(lib)
+            }
             Buffer = self.Buffer
         } catch (err) {
             console.log('error importando')

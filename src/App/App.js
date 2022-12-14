@@ -9,7 +9,7 @@ import HomePanel from '../views/HomePanel'
 import PlayerPanel from '../views/PlayerPanel'
 import { pathState } from '../recoilConfig'
 import languages from '@cospired/i18n-iso-languages'
-import useExtractMp4Subtitles from '../hooks/extractMp4Subtitles'
+import useExtractSubtitles from '../hooks/extractSubtitles'
 import '../back'
 import './attachErrorHandler'
 
@@ -19,11 +19,11 @@ const RoutablePanels = Routable({ navigate: 'onBack' }, Panels)
 const App = ({ ...rest }) => {
     /** @type {[String, Function]} */
     const [path, setPath] = useRecoilState(pathState)
-    const extractMp4Subtitle = useExtractMp4Subtitles()
+    const extractSubtitle = useExtractSubtitles()
     const backHome = useCallback(() => {
-        extractMp4Subtitle.postMessage({ action: 'cancel' })
+        extractSubtitle.postMessage({ action: 'cancel' })
         setPath('/home')
-    }, [setPath, extractMp4Subtitle])
+    }, [setPath, extractSubtitle])
 
 
     return (

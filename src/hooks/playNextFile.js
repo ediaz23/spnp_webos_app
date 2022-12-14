@@ -2,7 +2,7 @@
 import { useMemo } from 'react'
 import { useRecoilValue, useRecoilState } from 'recoil'
 import { filesState, fileIndexState } from '../recoilConfig'
-import useExtractMp4Subtitles from './extractMp4Subtitles'
+import useExtractSubtitles from './extractSubtitles'
 
 
 export default function usePlayNext() {
@@ -13,7 +13,7 @@ export default function usePlayNext() {
     const filesReverse = useMemo(() => [...files].reverse(), [files])
     /** @type {[Number, Function]} */
     const [fileIndex, setFileIndex] = useRecoilState(fileIndexState)
-    const extractMp4Subtitle = useExtractMp4Subtitles()
+    const extractSubtitle = useExtractSubtitles()
 
     return ({ backHome, repeat, typeSelected, setLoading, prev }) => {
         const audio = document.createElement('audio')
@@ -50,7 +50,7 @@ export default function usePlayNext() {
         while (nextIndex < array.length && !validFile(array[nextIndex])) {
             ++nextIndex
         }
-        extractMp4Subtitle.postMessage({ action: 'cancel' })
+        extractSubtitle.postMessage({ action: 'cancel' })
         if (nextIndex < array.length) {
             setLoading(true)
             setFileIndex(complementIndex(nextIndex))

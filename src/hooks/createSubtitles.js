@@ -1,12 +1,13 @@
 
 import { useMemo, useRef } from 'react'
-import useExtractMp4Subtitles from './extractMp4Subtitles'
+import useExtractSubtitles from './extractSubtitles'
 
-
+/**
+ * @param {import('../models/Playable').default} file
+ */
 export default function useCreateSubtitles(file) {
-    const extractMp4Subtitle = useExtractMp4Subtitles()
+    const subtitleWorker = useExtractSubtitles()
     const subtitlesRef = useRef(null)
-    const subtitleWorker = extractMp4Subtitle
 
     return useMemo(() => ({ stopLoading, videoRef }) => {
 
@@ -46,7 +47,7 @@ export default function useCreateSubtitles(file) {
             }
         }
 
-        const dataParam = { url: file.res.url, size: file.res.size }
+        const dataParam = { url: file.res.url, size: file.res.size, mimeType: file.mimeType }
         subtitleWorker.addEventListener('message', processSubtitles)
         subtitleWorker.addEventListener('messageerror', stopLoading)
         subtitleWorker.addEventListener('error', stopLoading)
