@@ -4,12 +4,17 @@ import PropTypes from 'prop-types'
 import Item from '@enact/moonstone/Item'
 import Image from '@enact/moonstone/Image'
 import BodyText from '@enact/moonstone/BodyText'
+import { Row, Cell } from '@enact/ui/Layout'
 import css from './FileListItem.module.less'
 
 
 const cleanDuration = str => str.split('.')[0]
 /** @param {import('../models/File').default} file */
-const simple = file => (<BodyText className={css.caption}>{file.title}</BodyText>)
+const simple = file => (
+    <div className={css.caption}>
+        <BodyText>{file.title}</BodyText>
+    </div>
+)
 /** @param {import('../models/Playable').default} file */
 const playable = file => (
     <div className={css.caption}>
@@ -29,11 +34,17 @@ const FileListItem = kind({
     render: ({ selectItem, file, ...rest }) => {
         return (
             <Item onClick={selectItem} {...rest}>
-                <Image className={css.image}
-                    src={file.imageUrl}
-                    style={{ maxHeight: 100, maxWidth: 100 }} />
-                {['folder', 'image'].includes(file.type) && simple(file)}
-                {['video', 'music'].includes(file.type) && playable(file)}
+                <Row>
+                    <Cell shrink>
+                        <Image className={css.image}
+                            src={file.imageUrl}
+                            style={{ maxHeight: 100, maxWidth: 100 }} />
+                    </Cell>
+                    <Cell align="center">
+                        {['folder', 'image'].includes(file.type) && simple(file)}
+                        {['video', 'music'].includes(file.type) && playable(file)}
+                    </Cell>
+                </Row>
             </Item>
         )
     }
