@@ -117,6 +117,9 @@ const getMp4Atoms = async ({ url, fileSize }) => {
         if (size < 0) { throw new Error('not mp4') }
         const type = buffer.toString('utf8', 4, 8)
         buffers.push({ type, size, pos })
+        if (type === 'moof') {  // it's a stream.
+            break
+        }
     }
     return buffers
 }
