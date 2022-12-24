@@ -13,21 +13,26 @@ const CellItem = Spottable(Skinnable(Cell))
 
 const FileListItem = ({ selectItem, file, ...rest }) => {
 
+    const cellSize = ['video', 'music'].includes(file.type) ? '50%' : '100%'
+
     return (
         <CellItem onClick={selectItem} {...rest}>
-            <Row>
-                <Cell shrink>
+            <Row id="Row">
+                <Cell shrink id="cell1">
                     <Image className={css.image}
                         src={file.imageUrl}
                         style={{ maxHeight: 100, maxWidth: 100 }} />
                 </Cell>
-                <Cell align="center">
-                    <Column>
-                        <Cell>
+                <Cell align="center" id="cell2">
+                    <Column id="colunm">
+                        <Cell id="cell3" size={cellSize}>
                             <Marquee marqueeOn='render'>{file.title}</Marquee>
                         </Cell>
                         {['video', 'music'].includes(file.type) &&
-                            <Cell>{cleanDuration(file.res.duration)}</Cell>}
+                            <Cell id="cell4" size={cellSize}>
+                                {cleanDuration(file.res.duration)}
+                            </Cell>
+                        }
                     </Column>
                 </Cell>
             </Row>
