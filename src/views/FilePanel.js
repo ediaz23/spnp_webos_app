@@ -8,8 +8,8 @@ import IconButton from '@enact/moonstone/IconButton'
 import Input from '@enact/moonstone/Input'
 import $L from '@enact/i18n/$L'
 import PropTypes from 'prop-types'
-import { useRecoilValue, useRecoilState } from 'recoil'
-import { deviceState, filePathState, searchState, filesState } from '../recoilConfig'
+import { useRecoilValue, useRecoilState, useSetRecoilState } from 'recoil'
+import { deviceState, filePathState, searchState, filesState, homeIndexState } from '../recoilConfig'
 import FileList from '../components/FileList'
 import PathNavigate from '../components/PathNavigate'
 import backend from '../api/backend'
@@ -18,6 +18,7 @@ import Folder from '../models/Folder'
 import Image from '../models/Image'
 import Music from '../models/Music'
 import Video from '../models/Video'
+import back from '../back'
 
 
 /**
@@ -84,6 +85,8 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const [isLoading, setIsLoading] = useState(false)
     /** @type {[String, Function]}  */
     const [message, setMessage] = useState('')
+    /** @type {Function} */
+    const setHomeIndex = useSetRecoilState(homeIndexState)
 
     const setResult = useCallback((data) => {
         if (data && data.length) {
@@ -137,6 +140,13 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
         setValue('')
     }, [fetchData, setSearch])
 
+    const contactMe = useCallback(() => {
+        setHomeIndex(2)
+        back.pushHistory({
+            doBack: () => { setHomeIndex(1) }
+        })
+    }, [setHomeIndex])
+
     useEffect(() => {
         if (files === null) {
             fetchData()
@@ -149,6 +159,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
                 <Input placeholder={$L('Search')} value={value} onChange={handleChange} />
                 <IconButton size="small" onClick={searchButton}>search</IconButton>
                 <IconButton size="small" onClick={refreshData}>refresh</IconButton>
+                <IconButton size="small" onClick={contactMe}>info</IconButton>
             </Header>
             <Row style={{ height: '100%' }}>
                 <Cell>

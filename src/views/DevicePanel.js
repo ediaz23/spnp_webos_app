@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Spinner from '@enact/moonstone/Spinner'
 import Popup from '@enact/moonstone/Popup'
 import { Header, Panel } from '@enact/moonstone/Panels'
+import { useSetRecoilState } from 'recoil'
 import $L from '@enact/i18n/$L'
 import IconButton from '@enact/moonstone/IconButton'
 import PropTypes from 'prop-types'
@@ -12,6 +13,8 @@ import wifi0 from '../../assets/img/wifi.png'
 import wifi1 from '../../assets/img/wifi1.png'
 import wifi2 from '../../assets/img/wifi2.png'
 import wifi3 from '../../assets/img/wifi3.png'
+import back from '../back'
+import { homeIndexState } from '../recoilConfig'
 
 
 const wifiImg = [wifi0, wifi1, wifi2, wifi3]
@@ -24,6 +27,8 @@ const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     const [isLoading, setIsLoading] = useState(true)
     /** @type {[String, Function]}  */
     const [message, setMessage] = useState('')
+    /** @type {Function} */
+    const setHomeIndex = useSetRecoilState(homeIndexState)
 
     const fetchData = useCallback(async () => {
         setIsLoading(true)
@@ -47,12 +52,19 @@ const DevicePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
 
     const handleOnClose = useCallback(() => { setMessage('') }, [])
     const refreshData = useCallback(() => { fetchData() }, [fetchData,])
+    const contactMe = useCallback(() => {
+        setHomeIndex(2)
+        back.pushHistory({
+            doBack: () => { setHomeIndex(0) }
+        })
+    }, [setHomeIndex])
     useEffect(() => { fetchData() }, [fetchData])
 
     return (
         <Panel {...rest}>
             <Header title={title} titleBelow={titleBelow}>
                 <IconButton size="small" onClick={refreshData}>refresh</IconButton>
+                <IconButton size="small" onClick={contactMe}>info</IconButton>
             </Header>
             {isLoading &&
                 <Spinner transparent centered>{$L('Loading...')}</Spinner>

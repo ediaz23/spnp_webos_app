@@ -30,5 +30,13 @@
     "Position": "Posición",
     "Size": "Tamaño",
     "Color": "Color",
-    "Activar": "Activar"
+    "Activar": "Activar",
+    "Contact Information": "Información de Contacto",
+    "About me": "Acerca de mí",
+    "Avatar": "Avatar",
+    "Donation?": "Donación?",
+    "Issues or suggestion?": "¿Problemas o sugerencias?",
+    "Hi there! My name is Esteban and I'm a programmer by profession. I have been in the tech industry for couple of years now and I love what I do. In my free time, I enjoy watching anime and staying up to date with the latest shows.": "¡Hola! Mi nombre es Esteban y soy programador de profesión. He estado en la industria de la tecnología durante un par de años y me encanta lo que hago. En mi tiempo libre, disfruto viendo anime y manteniéndome al día con los últimos estrenos.",
+    "If you have any issues, problems, or suggestion regarding our project, please feel free to leave them in our GitHub repository. Your feedback is always welcome and will help us improve our project.": "Si tiene alguna duda, problema o sugerencia con respecto a nuestro proyecto, no dude en dejarlos en nuestro repositorio de GitHub. Tus comentarios son siempre bienvenidos y nos ayudarán a mejorar nuestro proyecto.",
+    "We appreciate your support for our project! If you would like to make a donation, we offer several options to choose from. Your contributions help us continue to develop. Thank you for your generosity!": "¡Agradecemos su apoyo a nuestro proyecto! Si desea hacer una donación, ofrecemos varias opciones para elegir. Sus contribuciones nos ayudan a seguir desarrollándonos. ¡Gracias por tu generosidad!"
 }
