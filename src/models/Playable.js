@@ -1,8 +1,8 @@
 
-import File from './File'
+import FileBase from './File'
 
 
-export default class Playable extends File {
+export default class Playable extends FileBase {
     constructor(obj) {
         super(obj)
         /** @type {Date} */

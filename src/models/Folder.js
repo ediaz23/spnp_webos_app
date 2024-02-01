@@ -1,9 +1,9 @@
 
-import File from './File'
+import FileBase from './File'
 import defaulImage from '../../assets/img/folder.png'
 
 
-export default class Folder extends File {
+export default class Folder extends FileBase {
     constructor(obj) {
         super(obj)
         /** @type {Integer} */

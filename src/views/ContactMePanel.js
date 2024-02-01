@@ -11,7 +11,7 @@ import githubImg from '../../assets/img/github.png'
 import paypalImg from '../../assets/img/paypal.png'
 import btcImg from '../../assets/img/btc.png'
 import ethImg from '../../assets/img/eth.png'
-import perfilImg from '../../assets/img/perfil.jpeg'
+//import perfilImg from '../../assets/img/perfil.jpeg'
 import perfilImg2 from '../../assets/img/perfil2.jpg'
 
 

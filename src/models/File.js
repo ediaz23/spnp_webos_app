@@ -2,7 +2,7 @@
 import defaulImage from '../../assets/img/file.png'
 
 
-export default class File {
+export default class FileBase {
     constructor(obj) {
         /** @type {String} */
         this.id = obj.id

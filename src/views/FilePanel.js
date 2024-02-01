@@ -13,7 +13,7 @@ import { deviceState, filePathState, searchState, filesState, homeIndexState } f
 import FileList from '../components/FileList'
 import PathNavigate from '../components/PathNavigate'
 import backend from '../api/backend'
-import File from '../models/File'
+import FileBase from '../models/File'
 import Folder from '../models/Folder'
 import Image from '../models/Image'
 import Music from '../models/Music'
@@ -23,7 +23,7 @@ import back from '../back'
 
 /**
  * @param {Object} file
- * @returns {File}
+ * @returns {FileBase}
  */
 const toFile = file => {
     let out
@@ -36,14 +36,14 @@ const toFile = file => {
     } else if (file.class === 'object.item.audioItem.musicTrack') {
         out = new Music(file)
     } else {
-        out = new File(file)
+        out = new FileBase(file)
     }
     return out
 }
 
 /**
- * @param {File} a
- * @param {File} b
+ * @param {FileBase} a
+ * @param {FileBase} b
  * @returns {Integer}
  */
 const sortFiles = (a, b) => {
@@ -71,7 +71,7 @@ const sortFiles = (a, b) => {
 const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
     /** @type {import('../types').Device} */
     const device = useRecoilValue(deviceState)
-    /** @type {[Array<File>, Function]}  */
+    /** @type {[Array<FileBase>, Function]}  */
     const [files, setFiles] = useRecoilState(filesState)
     /** @type {Array<Folder>} */
     const filePath = useRecoilValue(filePathState)
@@ -90,7 +90,7 @@ const FilePanel = ({ spotlightId, title, titleBelow, ...rest }) => {
 
     const setResult = useCallback((data) => {
         if (data && data.length) {
-            /** @type {Array<File>} */
+            /** @type {Array<FileBase>} */
             const newData = data.map(toFile)
             setFiles(newData.sort(sortFiles))
         } else {

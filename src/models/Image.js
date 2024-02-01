@@ -1,8 +1,8 @@
 
-import File from './File'
+import FileBase from './File'
 
 
-export default class Image extends File {
+export default class Image extends FileBase {
     /**
      * @todo falta res
      */
